@@ -216,8 +216,14 @@ function worldTotalStars(worldId){ return (save[worldId]||[0,0,0,0,0]).reduce((a
 
 /* ================= World / Stage Definitions ================= */
 const WORLDS = [
-  { id:'merge', name:'과일 합치기', icon:'🍉', color:'#37b24d', desc:'같은 과일을 합쳐 목표 점수를 달성하세요',
-    stages:[ {target:45,drops:16}, {target:100,drops:18}, {target:170,drops:20}, {target:270,drops:22}, {target:400,drops:24} ] },
+  { id:'merge', name:'과일 합치기', icon:'🍉', color:'#37b24d', desc:'합칠수록 미쳐가는 과일 게임 — 폭탄, 회전날, 동물모드까지',
+    stages:[
+      {target:45,drops:16, label:'클래식'},
+      {target:100,drops:18, label:'클래식+'},
+      {target:170,drops:20, bomb:true, label:'💣 폭탄 과일'},
+      {target:260,drops:22, obstacle:true, label:'🌀 회전 장애물'},
+      {target:380,drops:24, bomb:true, obstacle:true, animal:true, label:'🔥 카오스 파티'},
+    ] },
   { id:'match3', name:'매치3 스매시', icon:'🍬', color:'#e64980', desc:'같은 색을 3개 이상 맞춰 스코어를 채우세요',
     stages:[ {size:6,colors:4,moves:17,target:320}, {size:6,colors:5,moves:19,target:480}, {size:7,colors:5,moves:21,target:700}, {size:7,colors:6,moves:23,target:900}, {size:8,colors:6,moves:27,target:1300} ] },
   { id:'n2048', name:'넘버 2048', icon:'🔢', color:'#4dabf7', desc:'타일을 밀어서 목표 숫자를 만들어보세요',
@@ -234,12 +240,8 @@ const WORLDS = [
     ] },
   { id:'lights', name:'라이트 아웃', icon:'💡', color:'#ffd166', desc:'모든 불을 꺼서 미션을 완료하세요',
     stages:[ {size:3,scramble:4}, {size:3,scramble:6}, {size:4,scramble:8}, {size:4,scramble:10}, {size:5,scramble:12} ] },
-  { id:'memory', name:'기억력 매치', icon:'🧠', color:'#22b8cf', desc:'카드를 뒤집어 같은 그림 짝을 맞추세요',
-    stages:[ {pairs:4}, {pairs:6}, {pairs:8}, {pairs:10}, {pairs:12} ] },
   { id:'maze', name:'미로 탈출', icon:'🔲', color:'#748ffc', desc:'미로를 통과해 출구까지 이동하세요',
     stages:[ {size:6}, {size:8}, {size:10}, {size:12}, {size:14} ] },
-  { id:'sudoku', name:'미니 스도쿠', icon:'🔢', color:'#ff8787', desc:'가로·세로·박스에 숫자가 겹치지 않게 채우세요',
-    stages:[ {size:4,box:[2,2],givens:9}, {size:4,box:[2,2],givens:7}, {size:6,box:[2,3],givens:20}, {size:6,box:[2,3],givens:16}, {size:6,box:[2,3],givens:13} ] },
   { id:'nonogram', name:'노노그램', icon:'🖼️', color:'#63e6be', desc:'힌트 숫자를 보고 그림을 완성하세요',
     stages:[ {id:'heart5'}, {id:'star5'}, {id:'smile6'}, {id:'tree7'}, {id:'boat8'} ] },
   { id:'blockfit', name:'블록 채우기', icon:'🧱', color:'#e599f7', desc:'블록을 놓아 가로·세로 줄을 채워 없애세요',
@@ -458,6 +460,21 @@ function mountMerge(area, cfg, cb){
     { r:102,color:'#2f9e44', hi:'#69db7c', score:55 },
     { r:124,color:'#2b8a3e', hi:'#40c057', score:100 },
   ];
+  const ANIMALS = [
+    { r:14, color:'#fff3bf', hi:'#fff9db', score:1, emoji:'🐣', weight:0.55 },
+    { r:19, color:'#ffe066', hi:'#fff3bf', score:3, emoji:'🐤', weight:0.65 },
+    { r:25, color:'#ffd43b', hi:'#ffe066', score:6, emoji:'🐥', weight:0.78 },
+    { r:32, color:'#ffc078', hi:'#ffd8a8', score:10, emoji:'🐔', weight:0.92 },
+    { r:40, color:'#ffa8a8', hi:'#ffc9c9', score:15, emoji:'🐷', weight:1.15 },
+    { r:49, color:'#eebefa', hi:'#f3d9fa', score:21, emoji:'🐶', weight:1.3 },
+    { r:59, color:'#b2f2bb', hi:'#d3f9d8', score:28, emoji:'🐱', weight:1.45 },
+    { r:71, color:'#a5d8ff', hi:'#d0ebff', score:36, emoji:'🐮', weight:1.6 },
+    { r:85, color:'#ffd8a8', hi:'#ffe8cc', score:45, emoji:'🦁', weight:1.75 },
+    { r:102,color:'#d0bfff', hi:'#e5dbff', score:55, emoji:'🐻', weight:1.9 },
+    { r:124,color:'#ced4da', hi:'#e9ecef', score:100, emoji:'🐘', weight:2.1 },
+  ];
+  const SKIN = cfg.animal ? ANIMALS : FRUITS;
+  const BOMB_R = 30;
   const canvas = document.createElement('canvas');
   area.appendChild(canvas);
   const ctx = canvas.getContext('2d');
@@ -469,35 +486,63 @@ function mountMerge(area, cfg, cb){
     canvas.style.width=W+'px'; canvas.style.height=H+'px';
     canvas.width=Math.floor(W*DPR); canvas.height=Math.floor(H*DPR);
     ctx.setTransform(DPR,0,0,DPR,0,0);
-    DANGER_Y = H*0.16;
+    DANGER_Y = H*0.11;
   }
   let DANGER_Y=0;
   const GRAVITY=1400, DAMPING=0.985, WALL_R=0.28, FLOOR_R=0.22, FRUIT_R=0.12;
   let bodies=[], idc=1, score=0, dropsLeft=cfg.drops, dangerTimer=0, ended=false;
   let dropX=0, currentIndex=0, nextIndex=0, canDrop=true, aiming=false;
-  let particles=[], floatTexts=[];
+  let particles=[], floatTexts=[], shake=0;
+  let obstacleAngle=0;
 
-  function makeBody(x,y,index){ return {id:idc++,x,y,vx:0,vy:0,index,r:FRUITS[index].r,merging:false,spawnT:0,drawScale:0.6}; }
+  function makeBody(x,y,index){
+    if(index===-1) return {id:idc++,x,y,vx:0,vy:0,index:-1,isBomb:true,r:BOMB_R,merging:false,spawnT:0,drawScale:0.6,weight:1};
+    return {id:idc++,x,y,vx:0,vy:0,index,r:SKIN[index].r,merging:false,spawnT:0,drawScale:0.6,weight:(SKIN[index].weight||1)};
+  }
   function randomDropIndex(){
+    if(cfg.bomb && Math.random()<0.13) return -1;
     const r=Math.random();
     if(r<0.45) return 0; if(r<0.75) return 1; if(r<0.92) return 2; return 3;
   }
   function drawFruit(x,y,r,index,alpha){
-    const f=FRUITS[index];
     ctx.save(); ctx.globalAlpha = alpha===undefined?1:alpha;
+    if(index===-1){
+      const grad=ctx.createRadialGradient(x-r*0.3,y-r*0.3,r*0.1,x,y,r);
+      grad.addColorStop(0,'#495057'); grad.addColorStop(1,'#1a1a1a');
+      ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fillStyle=grad; ctx.fill();
+      ctx.lineWidth=Math.max(1,r*0.06); ctx.strokeStyle='#ff6b6b'; ctx.stroke();
+      ctx.font=(r*1.2)+'px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('💣', x, y+1);
+      ctx.restore();
+      return;
+    }
+    const f=SKIN[index];
     const grad = ctx.createRadialGradient(x-r*0.35,y-r*0.35,r*0.1,x,y,r);
     grad.addColorStop(0,f.hi); grad.addColorStop(1,f.color);
     ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fillStyle=grad; ctx.fill();
     ctx.lineWidth=Math.max(1,r*0.04); ctx.strokeStyle='rgba(0,0,0,0.15)'; ctx.stroke();
-    ctx.beginPath(); ctx.arc(x-r*0.32,y-r*0.32,r*0.22,0,Math.PI*2); ctx.fillStyle='rgba(255,255,255,0.35)'; ctx.fill();
+    if(f.emoji){
+      ctx.font=(r*1.15)+'px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(f.emoji, x, y+1);
+    } else {
+      ctx.beginPath(); ctx.arc(x-r*0.32,y-r*0.32,r*0.22,0,Math.PI*2); ctx.fillStyle='rgba(255,255,255,0.35)'; ctx.fill();
+    }
     ctx.restore();
   }
   function updateHud(){ cb.setHud('점수 '+score+' / '+cfg.target+' · 남은 드롭 '+dropsLeft); }
-  cb.setGoal('목표 점수 '+cfg.target+'점 · 드롭 '+cfg.drops+'회 이내');
+  (function(){
+    let goalMsg = '목표 점수 '+cfg.target+'점 · 드롭 '+cfg.drops+'회 이내';
+    const extras=[];
+    if(cfg.bomb) extras.push('💣 폭탄 과일은 주변을 한번에 날려요');
+    if(cfg.obstacle) extras.push('🌀 회전 장애물을 피하세요');
+    if(cfg.animal) extras.push('🐘 무거운 동물일수록 빨리 떨어져요');
+    if(extras.length) goalMsg += ' — ' + extras.join(' · ');
+    cb.setGoal(goalMsg);
+  })();
 
-  function spawnParticles(x,y,color){
-    for(let i=0;i<10;i++){
-      const ang=Math.random()*Math.PI*2, spd=60+Math.random()*120;
+  function spawnParticles(x,y,color,n,spdMul){
+    for(let i=0;i<(n||10);i++){
+      const ang=Math.random()*Math.PI*2, spd=(60+Math.random()*120)*(spdMul||1);
       particles.push({x,y,vx:Math.cos(ang)*spd,vy:Math.sin(ang)*spd,life:0.5+Math.random()*0.3,age:0,color});
     }
   }
@@ -511,15 +556,16 @@ function mountMerge(area, cfg, cb){
     const rect=canvas.getBoundingClientRect();
     return clientX-rect.left;
   }
+  function curR(){ return currentIndex===-1 ? BOMB_R : SKIN[currentIndex].r; }
   function onDown(e){ if(ended) return; ensureAudio(); aiming=true; updateAim(e); e.preventDefault(); }
   function onMove(e){ if(!aiming) return; updateAim(e); e.preventDefault(); }
   function onUp(e){ if(!aiming) return; aiming=false; doDrop(); e.preventDefault(); }
-  function updateAim(e){ const f=FRUITS[currentIndex]; let x=getX(e); x=Math.max(f.r+4,Math.min(W-f.r-4,x)); dropX=x; }
+  function updateAim(e){ const r=curR(); let x=getX(e); x=Math.max(r+4,Math.min(W-r-4,x)); dropX=x; }
   function doDrop(){
     if(!canDrop || ended || dropsLeft<=0) return;
     canDrop=false;
-    const f=FRUITS[currentIndex];
-    bodies.push(makeBody(dropX,f.r+4,currentIndex));
+    const r=curR();
+    bodies.push(makeBody(dropX,r+4,currentIndex));
     beep(220,0.1,'triangle',0.1);
     dropsLeft--;
     currentIndex=nextIndex; nextIndex=randomDropIndex();
@@ -533,15 +579,64 @@ function mountMerge(area, cfg, cb){
   canvas.addEventListener('touchmove', onMove, {passive:false});
   canvas.addEventListener('touchend', onUp, {passive:false});
 
+  function obstacleEndpoints(){
+    const cx=W/2, cy=H*0.48;
+    const len = Math.min(W,H)*0.34;
+    const dx=Math.cos(obstacleAngle)*len, dy=Math.sin(obstacleAngle)*len;
+    return {x1:cx-dx,y1:cy-dy,x2:cx+dx,y2:cy+dy,cx,cy};
+  }
+  function resolveObstacle(b, dt){
+    const {x1,y1,x2,y2,cx,cy} = obstacleEndpoints();
+    const dx=x2-x1, dy=y2-y1, len2=dx*dx+dy*dy;
+    let t=((b.x-x1)*dx+(b.y-y1)*dy)/len2;
+    t=Math.max(0,Math.min(1,t));
+    const px=x1+t*dx, py=y1+t*dy;
+    const distX=b.x-px, distY=b.y-py, dist=Math.hypot(distX,distY);
+    const barHalf=7;
+    const minDist=b.r+barHalf;
+    if(dist<minDist){
+      const nx = dist>0.01 ? distX/dist : 1, ny = dist>0.01 ? distY/dist : 0;
+      b.x += nx*(minDist-dist); b.y += ny*(minDist-dist);
+      const radius=Math.hypot(px-cx,py-cy);
+      const angVel=1.15;
+      const tSpeed=angVel*radius;
+      const tx=-Math.sin(obstacleAngle), ty=Math.cos(obstacleAngle);
+      const dir = ((tx*(b.x-cx)+ty*(b.y-cy))>=0) ? 1 : -1;
+      b.vx += tx*tSpeed*0.6*dir; b.vy += ty*tSpeed*0.6*dir;
+    }
+  }
+  function explodeBomb(bomb){
+    bomb.merging=true;
+    let bonus=0;
+    for(const other of bodies){
+      if(other===bomb || other.merging) continue;
+      const dist=Math.hypot(other.x-bomb.x, other.y-bomb.y);
+      if(dist < 90+other.r){
+        other.merging=true;
+        if(!other.isBomb) bonus += (SKIN[other.index] ? SKIN[other.index].score : 0)*1.4;
+        spawnParticles(other.x,other.y, other.isBomb?'#ff6b6b':SKIN[other.index].color, 6, 0.8);
+      }
+    }
+    score += Math.round(bonus)+5;
+    addFloat(bomb.x, bomb.y-BOMB_R-10, '💥 +'+(Math.round(bonus)+5), '#ffa8a8');
+    spawnParticles(bomb.x,bomb.y,'#ff922b',22,1.6);
+    beep(90,0.28,'sawtooth',0.22); beep(60,0.35,'sawtooth',0.18,0.05);
+    shake = Math.max(shake, 10);
+    updateHud();
+    if(score>=cfg.target && !ended) endWin();
+  }
+
   function step(dt){
     dt=Math.min(dt,1/30);
+    if(cfg.obstacle) obstacleAngle += dt*1.15;
     for(const b of bodies){
       if(b.merging) continue;
       b.spawnT+=dt; b.drawScale=0.6+0.4*Math.min(1,b.spawnT/0.15);
-      b.vy+=GRAVITY*dt; b.x+=b.vx*dt; b.y+=b.vy*dt; b.vx*=DAMPING; b.vy*=DAMPING;
+      b.vy+=GRAVITY*(b.weight||1)*dt; b.x+=b.vx*dt; b.y+=b.vy*dt; b.vx*=DAMPING; b.vy*=DAMPING;
       if(b.x-b.r<0){ b.x=b.r; b.vx=-b.vx*WALL_R; }
       if(b.x+b.r>W){ b.x=W-b.r; b.vx=-b.vx*WALL_R; }
       if(b.y+b.r>H){ b.y=H-b.r; b.vy=-b.vy*FLOOR_R; if(Math.abs(b.vy)<20) b.vy=0; }
+      if(cfg.obstacle) resolveObstacle(b, dt);
     }
     for(let i=0;i<bodies.length;i++){
       const a=bodies[i]; if(a.merging) continue;
@@ -549,9 +644,15 @@ function mountMerge(area, cfg, cb){
         const b=bodies[j]; if(b.merging) continue;
         const dx=b.x-a.x, dy=b.y-a.y, dist=Math.hypot(dx,dy)||0.001, minDist=a.r+b.r;
         if(dist<minDist){
-          if(a.index===b.index && a.index<FRUITS.length-1){
+          if(a.isBomb || b.isBomb){
+            if(a.spawnT>0.15 && b.spawnT>0.15){
+              explodeBomb(a.isBomb?a:b);
+            }
+            continue;
+          }
+          if(a.index===b.index && a.index<SKIN.length-1){
             a.merging=true; b.merging=true;
-            const nx=(a.x+b.x)/2, ny=(a.y+b.y)/2, newIndex=a.index+1, nf=FRUITS[newIndex];
+            const nx=(a.x+b.x)/2, ny=(a.y+b.y)/2, newIndex=a.index+1, nf=SKIN[newIndex];
             const nb=makeBody(nx,ny,newIndex);
             nb.vx=(a.vx+b.vx)*0.2; nb.vy=(a.vy+b.vy)*0.2-60; nb.spawnT=0.05;
             spawnParticles(nx,ny,nf.color);
@@ -577,10 +678,11 @@ function mountMerge(area, cfg, cb){
     particles=particles.filter(p=>p.age<p.life);
     for(const t of floatTexts) t.age+=dt;
     floatTexts=floatTexts.filter(t=>t.age<t.life);
+    if(shake>0) shake=Math.max(0,shake-dt*30);
 
     let inDanger=false;
     for(const b of bodies){ if(b.y-b.r<DANGER_Y && Math.abs(b.vy)<90 && b.spawnT>0.6){ inDanger=true; break; } }
-    if(inDanger){ dangerTimer+=dt; if(dangerTimer>1.5 && !ended) endLose('과일이 너무 높이 쌓였어요!'); }
+    if(inDanger){ dangerTimer+=dt; if(dangerTimer>2.2 && !ended) endLose('과일이 너무 높이 쌓였어요!'); }
     else dangerTimer=Math.max(0,dangerTimer-dt*2);
 
     if(!ended && dropsLeft<=0 && bodies.every(b=>Math.abs(b.vy)<5) && score<cfg.target){
@@ -597,8 +699,20 @@ function mountMerge(area, cfg, cb){
 
   function render(){
     ctx.clearRect(0,0,W,H);
+    ctx.save();
+    if(shake>0){ ctx.translate((Math.random()-0.5)*shake, (Math.random()-0.5)*shake); }
     ctx.save(); ctx.strokeStyle='rgba(255,80,80,0.5)'; ctx.setLineDash([6,6]); ctx.lineWidth=2;
     ctx.beginPath(); ctx.moveTo(0,DANGER_Y); ctx.lineTo(W,DANGER_Y); ctx.stroke(); ctx.restore();
+    if(cfg.obstacle){
+      const {x1,y1,x2,y2,cx,cy} = obstacleEndpoints();
+      ctx.save();
+      ctx.lineCap='round'; ctx.lineWidth=14; ctx.strokeStyle='rgba(120,80,40,0.9)';
+      ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+      ctx.lineWidth=6; ctx.strokeStyle='rgba(200,150,90,0.9)';
+      ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(cx,cy,9,0,Math.PI*2); ctx.fillStyle='#495057'; ctx.fill();
+      ctx.restore();
+    }
     for(const b of bodies) drawFruit(b.x,b.y,b.r*(b.drawScale||1),b.index);
     for(const p of particles){
       const a=1-p.age/p.life; ctx.save(); ctx.globalAlpha=Math.max(0,a); ctx.fillStyle=p.color;
@@ -610,11 +724,12 @@ function mountMerge(area, cfg, cb){
       ctx.fillText(t.text, t.x, t.y - t.age*30); ctx.restore();
     }
     if(!ended){
-      const f=FRUITS[currentIndex];
+      const r=curR();
       ctx.save(); ctx.globalAlpha=0.9; ctx.setLineDash([4,6]); ctx.strokeStyle='rgba(255,255,255,0.25)';
-      ctx.beginPath(); ctx.moveTo(dropX,f.r*2+8); ctx.lineTo(dropX,H); ctx.stroke(); ctx.restore();
-      drawFruit(dropX,f.r+4,f.r,currentIndex,canDrop?1:0.5);
+      ctx.beginPath(); ctx.moveTo(dropX,r*2+8); ctx.lineTo(dropX,H); ctx.stroke(); ctx.restore();
+      drawFruit(dropX,r+4,r,currentIndex,canDrop?1:0.5);
     }
+    ctx.restore();
   }
   let raf=null, lastT=performance.now();
   function loop(now){
@@ -623,7 +738,7 @@ function mountMerge(area, cfg, cb){
     render();
     raf=requestAnimationFrame(loop);
   }
-  resize(); currentIndex=randomDropIndex(); nextIndex=randomDropIndex(); updateHud();
+  resize(); dropX=W/2; currentIndex=randomDropIndex(); nextIndex=randomDropIndex(); updateHud();
   raf=requestAnimationFrame(loop);
   const onResize=()=>resize();
   window.addEventListener('resize', onResize);
@@ -1256,6 +1371,670 @@ function mountLights(area, cfg, cb){
   }
   generate(); buildDom(); render(); updateHud();
   return { destroy(){} };
+}
+
+/* =========================================================================
+   GAME 7: MEMORY MATCH
+   ========================================================================= */
+function mountMemory(area, cfg, cb){
+  const PAIRS = cfg.pairs;
+  const ICONS = ['🍎','🍊','🍋','🍇','🍓','🍒','🍑','🥝','🍍','🥥','🍉','🍌','🥑','🌽','🍅','🥕'];
+  const chosen = ICONS.slice(0, PAIRS);
+  let deck = chosen.concat(chosen);
+  for(let i=deck.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [deck[i],deck[j]]=[deck[j],deck[i]]; }
+  let flipped=[], matched=new Set(), attempts=0, busy=false, ended=false;
+  cb.setGoal(PAIRS+'쌍을 모두 맞춰보세요');
+  function updateHud(){ cb.setHud('시도 '+attempts+'회 · '+(matched.size/2)+' / '+PAIRS); }
+
+  const cols = PAIRS<=8?4: PAIRS<=10?5:6;
+  const rows = Math.ceil(deck.length/cols);
+  const wrapDiv=document.createElement('div');
+  wrapDiv.style.cssText='display:flex;align-items:center;justify-content:center;width:100%;height:100%;';
+  const gridEl=document.createElement('div'); gridEl.className='pzGrid';
+  const rect=area.getBoundingClientRect();
+  const cellSize=Math.floor(Math.min((rect.width-24)/cols, (rect.height-24)/rows));
+  gridEl.style.gridTemplateColumns='repeat('+cols+','+cellSize+'px)';
+  gridEl.style.gridTemplateRows='repeat('+rows+','+cellSize+'px)';
+  wrapDiv.appendChild(gridEl);
+  area.appendChild(wrapDiv);
+
+  const cellEls=[];
+  function buildDom(){
+    gridEl.innerHTML=''; cellEls.length=0;
+    for(let i=0;i<deck.length;i++){
+      const cell=document.createElement('div'); cell.className='pzCell';
+      cell.style.width=cellSize+'px'; cell.style.height=cellSize+'px'; cell.style.fontSize=(cellSize*0.5)+'px'; cell.style.borderRadius='10px';
+      cell.addEventListener('pointerdown', ()=>onCard(i));
+      gridEl.appendChild(cell); cellEls.push(cell);
+    }
+  }
+  function render(){
+    for(let i=0;i<deck.length;i++){
+      const cell=cellEls[i];
+      const open = flipped.includes(i) || matched.has(i);
+      cell.textContent = open ? deck[i] : '';
+      cell.style.background = matched.has(i) ? 'rgba(81,207,102,0.28)' : open ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.06)';
+    }
+  }
+  function onCard(i){
+    if(busy||ended) return;
+    if(flipped.includes(i) || matched.has(i)) return;
+    ensureAudio(); sfxClick();
+    flipped.push(i); render();
+    if(flipped.length===2){
+      attempts++; updateHud(); busy=true;
+      const [a,b]=flipped;
+      if(deck[a]===deck[b]){
+        matched.add(a); matched.add(b);
+        sfxGood();
+        setTimeout(()=>{ flipped=[]; busy=false; render(); updateHud(); checkEnd(); }, 260);
+      } else {
+        setTimeout(()=>{ flipped=[]; busy=false; render(); }, 700);
+      }
+    }
+  }
+  function checkEnd(){
+    if(matched.size===deck.length && !ended){
+      ended=true;
+      const stars = attempts<=PAIRS*1.5?3: attempts<=PAIRS*2.2?2:1;
+      setTimeout(()=>cb.onWin(stars, attempts+'번 시도로 완료!'), 300);
+    }
+  }
+  buildDom(); render(); updateHud();
+  return { destroy(){} };
+}
+
+/* =========================================================================
+   GAME 8: MAZE
+   ========================================================================= */
+function genMaze(n){
+  const cells=Array.from({length:n},()=>Array.from({length:n},()=>({N:true,S:true,E:true,W:true,visited:false})));
+  const stack=[[0,0]];
+  cells[0][0].visited=true;
+  while(stack.length){
+    const [r,c]=stack[stack.length-1];
+    const dirs=[];
+    if(r>0 && !cells[r-1][c].visited) dirs.push('N');
+    if(r<n-1 && !cells[r+1][c].visited) dirs.push('S');
+    if(c>0 && !cells[r][c-1].visited) dirs.push('W');
+    if(c<n-1 && !cells[r][c+1].visited) dirs.push('E');
+    if(!dirs.length){ stack.pop(); continue; }
+    const dir=dirs[Math.floor(Math.random()*dirs.length)];
+    let nr=r,nc=c;
+    if(dir==='N'){ nr=r-1; cells[r][c].N=false; cells[nr][nc].S=false; }
+    if(dir==='S'){ nr=r+1; cells[r][c].S=false; cells[nr][nc].N=false; }
+    if(dir==='W'){ nc=c-1; cells[r][c].W=false; cells[nr][nc].E=false; }
+    if(dir==='E'){ nc=c+1; cells[r][c].E=false; cells[nr][nc].W=false; }
+    cells[nr][nc].visited=true;
+    stack.push([nr,nc]);
+  }
+  return cells;
+}
+function bfsShortest(cells, n, start, goal){
+  const visited=Array.from({length:n},()=>Array(n).fill(false));
+  let queue=[[start[0],start[1],0]];
+  visited[start[0]][start[1]]=true;
+  while(queue.length){
+    const [r,c,d]=queue.shift();
+    if(r===goal[0]&&c===goal[1]) return d;
+    const cell=cells[r][c];
+    const moves=[];
+    if(!cell.N) moves.push([r-1,c]);
+    if(!cell.S) moves.push([r+1,c]);
+    if(!cell.E) moves.push([r,c+1]);
+    if(!cell.W) moves.push([r,c-1]);
+    for(const [nr,nc] of moves){ if(!visited[nr][nc]){ visited[nr][nc]=true; queue.push([nr,nc,d+1]); } }
+  }
+  return 0;
+}
+function mountMaze(area, cfg, cb){
+  const N = cfg.size;
+  const cells = genMaze(N);
+  let player=[0,0];
+  const goal=[N-1,N-1];
+  let moves=0, ended=false;
+  const optimal = bfsShortest(cells, N, player, goal) || 1;
+  cb.setGoal('출구(⭐)까지 이동하세요 · 방향키/스와이프/클릭');
+  function updateHud(){ cb.setHud('이동 '+moves+'회'); }
+
+  const canvas=document.createElement('canvas');
+  area.appendChild(canvas);
+  const ctx=canvas.getContext('2d');
+  let W=0,H=0,DPR=1,cellPx=0,offX=0,offY=0;
+  function resize(){
+    const rect=area.getBoundingClientRect();
+    DPR=Math.min(window.devicePixelRatio||1,2);
+    W=rect.width; H=rect.height;
+    canvas.style.width=W+'px'; canvas.style.height=H+'px';
+    canvas.width=Math.floor(W*DPR); canvas.height=Math.floor(H*DPR);
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+    cellPx = (Math.min(W,H)-20)/N;
+    offX=(W-cellPx*N)/2; offY=(H-cellPx*N)/2;
+    render();
+  }
+  function render(){
+    ctx.clearRect(0,0,W,H);
+    ctx.save();
+    ctx.translate(offX,offY);
+    ctx.strokeStyle='rgba(255,255,255,0.75)'; ctx.lineWidth=Math.max(2,cellPx*0.06); ctx.lineCap='round';
+    for(let r=0;r<N;r++)for(let c=0;c<N;c++){
+      const cell=cells[r][c]; const x=c*cellPx, y=r*cellPx;
+      ctx.beginPath();
+      if(cell.N){ ctx.moveTo(x,y); ctx.lineTo(x+cellPx,y); }
+      if(cell.W){ ctx.moveTo(x,y); ctx.lineTo(x,y+cellPx); }
+      if(r===N-1 && cell.S){ ctx.moveTo(x,y+cellPx); ctx.lineTo(x+cellPx,y+cellPx); }
+      if(c===N-1 && cell.E){ ctx.moveTo(x+cellPx,y); ctx.lineTo(x+cellPx,y+cellPx); }
+      ctx.stroke();
+    }
+    ctx.font=(cellPx*0.55)+'px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('⭐', goal[1]*cellPx+cellPx/2, goal[0]*cellPx+cellPx/2);
+    const px=player[1]*cellPx+cellPx/2, py=player[0]*cellPx+cellPx/2;
+    const grad=ctx.createRadialGradient(px-4,py-4,2,px,py,cellPx*0.28);
+    grad.addColorStop(0,'#a5d8ff'); grad.addColorStop(1,'#4dabf7');
+    ctx.beginPath(); ctx.arc(px,py,cellPx*0.28,0,Math.PI*2); ctx.fillStyle=grad; ctx.fill();
+    ctx.restore();
+  }
+  function canMove(r,c,dir){
+    const cell=cells[r][c];
+    if(dir==='N') return !cell.N;
+    if(dir==='S') return !cell.S;
+    if(dir==='E') return !cell.E;
+    if(dir==='W') return !cell.W;
+  }
+  function tryMove(dir){
+    if(ended) return;
+    const [r,c]=player;
+    if(!canMove(r,c,dir)) return;
+    let nr=r,nc=c;
+    if(dir==='N') nr--; if(dir==='S') nr++; if(dir==='E') nc++; if(dir==='W') nc--;
+    player=[nr,nc]; moves++; sfxClick(); updateHud(); render();
+    if(nr===goal[0] && nc===goal[1] && !ended){
+      ended=true;
+      const stars = moves<=optimal*1.3?3: moves<=optimal*1.8?2:1;
+      setTimeout(()=>cb.onWin(stars, moves+'걸음 만에 도착! (최단 '+optimal+'걸음)'), 300);
+    }
+  }
+  function onKey(e){
+    const map={ArrowUp:'N',ArrowDown:'S',ArrowLeft:'W',ArrowRight:'E'};
+    if(map[e.key]){ e.preventDefault(); ensureAudio(); tryMove(map[e.key]); }
+  }
+  window.addEventListener('keydown', onKey);
+  let touchStart=null;
+  function onTouchStart(e){ ensureAudio(); touchStart=[e.touches[0].clientX,e.touches[0].clientY]; }
+  function onTouchEnd(e){
+    if(!touchStart) return;
+    const dx=e.changedTouches[0].clientX-touchStart[0], dy=e.changedTouches[0].clientY-touchStart[1];
+    if(Math.hypot(dx,dy)>=20){
+      if(Math.abs(dx)>Math.abs(dy)) tryMove(dx>0?'E':'W');
+      else tryMove(dy>0?'S':'N');
+    }
+    touchStart=null;
+  }
+  canvas.addEventListener('touchstart', onTouchStart, {passive:true});
+  canvas.addEventListener('touchend', onTouchEnd, {passive:true});
+  function onClick(e){
+    ensureAudio();
+    const rect=canvas.getBoundingClientRect();
+    const x=e.clientX-rect.left-offX, y=e.clientY-rect.top-offY;
+    const c=Math.floor(x/cellPx), r=Math.floor(y/cellPx);
+    const [pr,pc]=player;
+    if(r===pr-1&&c===pc) tryMove('N');
+    else if(r===pr+1&&c===pc) tryMove('S');
+    else if(r===pr&&c===pc+1) tryMove('E');
+    else if(r===pr&&c===pc-1) tryMove('W');
+  }
+  canvas.addEventListener('click', onClick);
+
+  resize();
+  updateHud();
+  const onResize=()=>resize();
+  window.addEventListener('resize', onResize);
+  return {
+    destroy(){ window.removeEventListener('keydown', onKey); window.removeEventListener('resize', onResize); }
+  };
+}
+
+/* =========================================================================
+   GAME 9: MINI SUDOKU
+   ========================================================================= */
+function mountSudoku(area, cfg, cb){
+  const N=cfg.size, BOX=cfg.box, GIVENS=cfg.givens;
+  let solution, puzzle, given, selected=null, mistakes=0, ended=false;
+  cb.setGoal(N+'x'+N+' 스도쿠 — 가로·세로·박스에 숫자가 겹치지 않게 채우세요');
+  function updateHud(){ cb.setHud('실수 '+mistakes+'회'); }
+
+  function boxOf(r,c){ return [Math.floor(r/BOX[0])*BOX[0], Math.floor(c/BOX[1])*BOX[1]]; }
+  function valid(g,r,c,v){
+    for(let i=0;i<N;i++){ if(i!==c && g[r][i]===v) return false; if(i!==r && g[i][c]===v) return false; }
+    const [br,bc]=boxOf(r,c);
+    for(let i=0;i<BOX[0];i++)for(let j=0;j<BOX[1];j++){ const rr=br+i, cc=bc+j; if((rr!==r||cc!==c) && g[rr][cc]===v) return false; }
+    return true;
+  }
+  function generateSolved(){
+    const g=Array.from({length:N},()=>Array(N).fill(0));
+    function fill(pos){
+      if(pos===N*N) return true;
+      const r=Math.floor(pos/N), c=pos%N;
+      const nums=[]; for(let i=1;i<=N;i++) nums.push(i);
+      for(let i=nums.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [nums[i],nums[j]]=[nums[j],nums[i]]; }
+      for(const v of nums){ if(valid(g,r,c,v)){ g[r][c]=v; if(fill(pos+1)) return true; g[r][c]=0; } }
+      return false;
+    }
+    fill(0);
+    return g;
+  }
+  function makePuzzle(){
+    solution = generateSolved();
+    puzzle = solution.map(row=>row.slice());
+    given = Array.from({length:N},()=>Array(N).fill(true));
+    let toRemove = N*N - GIVENS;
+    const cells=[]; for(let r=0;r<N;r++)for(let c=0;c<N;c++) cells.push([r,c]);
+    for(let i=cells.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [cells[i],cells[j]]=[cells[j],cells[i]]; }
+    for(const [r,c] of cells){ if(toRemove<=0) break; puzzle[r][c]=0; given[r][c]=false; toRemove--; }
+  }
+
+  const wrapDiv=document.createElement('div');
+  wrapDiv.style.cssText='display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;width:100%;height:100%;';
+  const gridEl=document.createElement('div'); gridEl.className='pzGrid'; gridEl.style.gap='2px';
+  const rect=area.getBoundingClientRect();
+  const cellSize=Math.floor(Math.min(rect.width-24, rect.height*0.65)/N);
+  gridEl.style.gridTemplateColumns='repeat('+N+','+cellSize+'px)';
+  gridEl.style.gridTemplateRows='repeat('+N+','+cellSize+'px)';
+  wrapDiv.appendChild(gridEl);
+  const padEl=document.createElement('div');
+  padEl.style.cssText='display:flex; gap:6px; flex-wrap:wrap; justify-content:center; max-width:'+(cellSize*N+20)+'px;';
+  wrapDiv.appendChild(padEl);
+  area.appendChild(wrapDiv);
+
+  const cellEls=[];
+  function boxParityOf(r,c){ return (Math.floor(r/BOX[0]) + Math.floor(c/BOX[1])) % 2; }
+  function buildDom(){
+    gridEl.innerHTML=''; cellEls.length=0;
+    for(let r=0;r<N;r++){ const row=[];
+      for(let c=0;c<N;c++){
+        const cell=document.createElement('div'); cell.className='pzCell';
+        cell.style.width=cellSize+'px'; cell.style.height=cellSize+'px'; cell.style.fontSize=(cellSize*0.42)+'px'; cell.style.borderRadius='4px';
+        cell.addEventListener('pointerdown', ()=>onCellClick(r,c));
+        gridEl.appendChild(cell); row.push(cell);
+      }
+      cellEls.push(row);
+    }
+    padEl.innerHTML='';
+    for(let v=1;v<=N;v++){
+      const btn=document.createElement('button'); btn.className='pz-btn secondary'; btn.style.padding='8px 14px'; btn.style.fontSize='15px';
+      btn.textContent=v;
+      btn.addEventListener('click', ()=>onInput(v));
+      padEl.appendChild(btn);
+    }
+    const clearBtn=document.createElement('button'); clearBtn.className='pz-btn secondary'; clearBtn.style.padding='8px 14px'; clearBtn.textContent='지우기';
+    clearBtn.addEventListener('click', ()=>onInput(0));
+    padEl.appendChild(clearBtn);
+  }
+  function render(){
+    for(let r=0;r<N;r++)for(let c=0;c<N;c++){
+      const cell=cellEls[r][c]; const v=puzzle[r][c];
+      cell.textContent = v || '';
+      cell.style.color = given[r][c] ? '#fff' : '#8ecbff';
+      cell.style.fontWeight = given[r][c] ? '900' : '700';
+      const isSel = !!(selected && selected[0]===r && selected[1]===c);
+      cell.style.background = isSel ? 'rgba(255,224,102,0.28)' : (boxParityOf(r,c) ? 'rgba(255,255,255,0.09)' : 'rgba(255,255,255,0.04)');
+    }
+  }
+  function onCellClick(r,c){
+    if(ended || given[r][c]) return;
+    ensureAudio(); sfxClick();
+    selected=[r,c]; render();
+  }
+  function onInput(v){
+    if(!selected || ended) return;
+    const [r,c]=selected;
+    if(given[r][c]) return;
+    if(v===0){ puzzle[r][c]=0; render(); return; }
+    puzzle[r][c]=v;
+    if(v!==solution[r][c]){ mistakes++; updateHud(); sfxBad(); }
+    else sfxGood();
+    render();
+    checkWin();
+  }
+  function checkWin(){
+    for(let r=0;r<N;r++)for(let c=0;c<N;c++) if(puzzle[r][c]!==solution[r][c]) return;
+    if(!ended){
+      ended=true;
+      const stars = mistakes===0?3: mistakes<=2?2:1;
+      setTimeout(()=>cb.onWin(stars, '실수 '+mistakes+'회로 완성!'), 300);
+    }
+  }
+  makePuzzle(); buildDom(); render(); updateHud();
+  return { destroy(){} };
+}
+
+/* =========================================================================
+   GAME 10: NONOGRAM
+   ========================================================================= */
+const NONO_PATTERNS = {
+  heart5: [
+    [0,1,0,1,0],
+    [1,1,1,1,1],
+    [1,1,1,1,1],
+    [0,1,1,1,0],
+    [0,0,1,0,0],
+  ],
+  star5: [
+    [0,0,1,0,0],
+    [0,1,1,1,0],
+    [1,1,1,1,1],
+    [0,1,1,1,0],
+    [0,0,1,0,0],
+  ],
+  smile6: [
+    [0,1,1,1,1,0],
+    [1,0,0,0,0,1],
+    [0,1,0,0,1,0],
+    [1,0,0,0,0,1],
+    [1,0,1,1,0,1],
+    [0,1,1,1,1,0],
+  ],
+  tree7: [
+    [0,0,0,1,0,0,0],
+    [0,0,1,1,1,0,0],
+    [0,1,1,1,1,1,0],
+    [0,0,1,1,1,0,0],
+    [0,1,1,1,1,1,0],
+    [0,0,0,1,0,0,0],
+    [0,0,0,1,0,0,0],
+  ],
+  boat8: [
+    [0,0,0,0,1,0,0,0],
+    [0,0,0,1,1,0,0,0],
+    [0,0,1,1,1,0,0,0],
+    [0,1,1,1,1,0,0,0],
+    [0,0,0,0,1,0,0,0],
+    [0,1,1,1,1,1,1,0],
+    [1,1,1,1,1,1,1,1],
+    [0,0,1,1,1,1,0,0],
+  ],
+};
+function computeClues(pattern, axis){
+  const n=pattern.length, m=pattern[0].length;
+  const clues=[];
+  if(axis==='row'){
+    for(let r=0;r<n;r++){
+      const runs=[]; let cnt=0;
+      for(let c=0;c<m;c++){ if(pattern[r][c]){ cnt++; } else { if(cnt>0) runs.push(cnt); cnt=0; } }
+      if(cnt>0) runs.push(cnt);
+      clues.push(runs.length?runs:[0]);
+    }
+  } else {
+    for(let c=0;c<m;c++){
+      const runs=[]; let cnt=0;
+      for(let r=0;r<n;r++){ if(pattern[r][c]){ cnt++; } else { if(cnt>0) runs.push(cnt); cnt=0; } }
+      if(cnt>0) runs.push(cnt);
+      clues.push(runs.length?runs:[0]);
+    }
+  }
+  return clues;
+}
+function mountNonogram(area, cfg, cb){
+  const pattern = NONO_PATTERNS[cfg.id];
+  const ROWS=pattern.length, COLS=pattern[0].length;
+  const rowClues=computeClues(pattern,'row'), colClues=computeClues(pattern,'col');
+  let userGrid=Array.from({length:ROWS},()=>Array(COLS).fill(false));
+  let mistakes=0, ended=false;
+  cb.setGoal('힌트 숫자만큼 칸을 채워 그림을 완성하세요');
+  function updateHud(){ cb.setHud('실수 '+mistakes+'회'); }
+
+  const maxRowClueLen = Math.max(...rowClues.map(r=>r.length));
+  const maxColClueLen = Math.max(...colClues.map(c=>c.length));
+  const rect=area.getBoundingClientRect();
+  const rawSize = Math.min((rect.width-20-maxRowClueLen*20)/COLS, (rect.height-20-maxColClueLen*16)/ROWS);
+  const cs = Math.max(22, Math.min(rawSize, 46));
+
+  const wrapDiv=document.createElement('div');
+  wrapDiv.style.cssText='display:flex; align-items:center; justify-content:center;';
+  area.appendChild(wrapDiv);
+
+  const table=document.createElement('div');
+  table.style.cssText='display:grid; gap:2px;';
+  table.style.gridTemplateColumns=(maxRowClueLen*18)+'px repeat('+COLS+','+cs+'px)';
+  table.style.gridTemplateRows=(maxColClueLen*16)+'px repeat('+ROWS+','+cs+'px)';
+  wrapDiv.appendChild(table);
+
+  table.appendChild(document.createElement('div'));
+  for(let c=0;c<COLS;c++){
+    const hdr=document.createElement('div');
+    hdr.style.cssText='display:flex; flex-direction:column; align-items:center; justify-content:flex-end; font-size:11px; font-weight:700; opacity:0.85; line-height:1.15;';
+    hdr.innerHTML = colClues[c].join('<br>');
+    table.appendChild(hdr);
+  }
+  const cellEls=[];
+  for(let r=0;r<ROWS;r++){
+    const rowHdr=document.createElement('div');
+    rowHdr.style.cssText='display:flex; align-items:center; justify-content:flex-end; font-size:11px; font-weight:700; opacity:0.85; gap:4px; padding-right:4px;';
+    rowHdr.textContent = rowClues[r].join(' ');
+    table.appendChild(rowHdr);
+    const rowCells=[];
+    for(let c=0;c<COLS;c++){
+      const cell=document.createElement('div');
+      cell.style.cssText='width:'+cs+'px;height:'+cs+'px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:4px;cursor:pointer;';
+      cell.addEventListener('pointerdown', (e)=>{ e.preventDefault(); onCellClick(r,c); });
+      table.appendChild(cell);
+      rowCells.push(cell);
+    }
+    cellEls.push(rowCells);
+  }
+  function render(){
+    for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+      cellEls[r][c].style.background = userGrid[r][c] ? '#63e6be' : 'rgba(255,255,255,0.06)';
+    }
+  }
+  function onCellClick(r,c){
+    if(ended) return;
+    ensureAudio();
+    userGrid[r][c] = !userGrid[r][c];
+    if(userGrid[r][c] && !pattern[r][c]){ mistakes++; updateHud(); sfxBad(); }
+    else sfxClick();
+    render();
+    checkWin();
+  }
+  function checkWin(){
+    for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+      if(!!userGrid[r][c] !== !!pattern[r][c]) return;
+    }
+    if(!ended){
+      ended=true;
+      const stars = mistakes===0?3: mistakes<=2?2:1;
+      setTimeout(()=>cb.onWin(stars, '실수 '+mistakes+'회로 완성!'), 300);
+    }
+  }
+  render(); updateHud();
+  return { destroy(){} };
+}
+
+/* =========================================================================
+   GAME 11: BLOCK FIT
+   ========================================================================= */
+function mountBlockFit(area, cfg, cb){
+  const SIZE=cfg.size, TARGET=cfg.target, PIECE_BUDGET=cfg.pieces;
+  const SHAPES = [
+    {cells:[[0,0]], color:'#ff6b6b'},
+    {cells:[[0,0],[0,1]], color:'#ffa94d'},
+    {cells:[[0,0],[1,0]], color:'#ffd43b'},
+    {cells:[[0,0],[0,1],[0,2]], color:'#82c91e'},
+    {cells:[[0,0],[1,0],[2,0]], color:'#51cf66'},
+    {cells:[[0,0],[0,1],[1,0],[1,1]], color:'#22b8cf'},
+    {cells:[[0,0],[0,1],[0,2],[1,0]], color:'#4dabf7'},
+    {cells:[[0,0],[1,0],[1,1],[1,2]], color:'#748ffc'},
+    {cells:[[0,0],[0,1],[1,1],[1,2]], color:'#9775fa'},
+    {cells:[[0,1],[0,2],[1,0],[1,1]], color:'#e599f7'},
+    {cells:[[0,0],[0,1],[0,2],[1,1]], color:'#f783ac'},
+    {cells:[[1,0],[1,1],[1,2],[0,1]], color:'#ff8787'},
+    {cells:[[0,0],[1,0],[2,0],[1,1]], color:'#66d9e8'},
+    {cells:[[0,0],[0,1],[1,0],[2,0]], color:'#ffe066'},
+  ];
+  let board=Array.from({length:SIZE},()=>Array(SIZE).fill(null));
+  let tray=[], piecesUsed=0, score=0, ended=false;
+  cb.setGoal('블록을 놓아 목표 점수 '+TARGET+'점을 달성하세요 (블록 '+PIECE_BUDGET+'개 이내)');
+  function updateHud(){ cb.setHud('점수 '+score+' / '+TARGET+' · 남은 블록 '+(PIECE_BUDGET-piecesUsed)); }
+
+  function randomShape(){ return SHAPES[Math.floor(Math.random()*SHAPES.length)]; }
+  function refillTray(){ tray=[randomShape(),randomShape(),randomShape()].map(s=>({shape:s, used:false})); }
+
+  const wrapDiv=document.createElement('div');
+  wrapDiv.style.cssText='display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; width:100%; height:100%;';
+  const boardEl=document.createElement('div'); boardEl.className='pzGrid'; boardEl.style.gap='3px';
+  const rect=area.getBoundingClientRect();
+  const cellSize=Math.floor(Math.min(rect.width-24, rect.height*0.62)/SIZE);
+  boardEl.style.gridTemplateColumns='repeat('+SIZE+','+cellSize+'px)';
+  boardEl.style.gridTemplateRows='repeat('+SIZE+','+cellSize+'px)';
+  boardEl.style.background='rgba(0,0,0,0.2)'; boardEl.style.padding='6px'; boardEl.style.borderRadius='10px';
+  wrapDiv.appendChild(boardEl);
+  const trayEl=document.createElement('div');
+  trayEl.style.cssText='display:flex; gap:16px; justify-content:center;';
+  wrapDiv.appendChild(trayEl);
+  area.appendChild(wrapDiv);
+
+  const boardCells=[];
+  for(let r=0;r<SIZE;r++){ const row=[];
+    for(let c=0;c<SIZE;c++){
+      const cell=document.createElement('div');
+      cell.style.cssText='width:'+cellSize+'px;height:'+cellSize+'px;border-radius:4px;background:rgba(255,255,255,0.06);';
+      cell.dataset.r=r; cell.dataset.c=c;
+      boardEl.appendChild(cell); row.push(cell);
+    }
+    boardCells.push(row);
+  }
+  function renderBoard(){
+    for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++){
+      const v=board[r][c];
+      boardCells[r][c].style.background = v || 'rgba(255,255,255,0.06)';
+      boardCells[r][c].style.boxShadow = v ? 'inset 0 0 0 2px rgba(255,255,255,0.25)' : 'none';
+    }
+  }
+  function buildMiniShape(shape, unit){
+    const maxR=Math.max(...shape.cells.map(c=>c[0]))+1, maxC=Math.max(...shape.cells.map(c=>c[1]))+1;
+    const box=document.createElement('div');
+    box.style.cssText='position:relative; width:'+(maxC*unit)+'px; height:'+(maxR*unit)+'px;';
+    shape.cells.forEach(([dr,dc])=>{
+      const b=document.createElement('div');
+      b.style.cssText='position:absolute; left:'+(dc*unit)+'px; top:'+(dr*unit)+'px; width:'+(unit-2)+'px; height:'+(unit-2)+'px; background:'+shape.color+'; border-radius:3px;';
+      box.appendChild(b);
+    });
+    return box;
+  }
+  function renderTray(){
+    trayEl.innerHTML='';
+    tray.forEach((p, idx)=>{
+      const holder=document.createElement('div');
+      holder.style.cssText='width:64px;height:64px;display:flex;align-items:center;justify-content:center;';
+      if(!p.used){
+        const mini=buildMiniShape(p.shape, 14);
+        mini.style.cursor='grab';
+        mini.addEventListener('pointerdown', (e)=>onPieceDown(e, idx));
+        holder.appendChild(mini);
+      }
+      trayEl.appendChild(holder);
+    });
+  }
+
+  let dragging=null;
+  function cellFromPoint(x,y){
+    const el=document.elementFromPoint(x,y);
+    if(!el) return null;
+    let node=el;
+    while(node && node.dataset && node.dataset.r===undefined) node=node.parentElement;
+    if(!node || !node.dataset || node.dataset.r===undefined) return null;
+    return [parseInt(node.dataset.r,10), parseInt(node.dataset.c,10)];
+  }
+  function canPlace(shape, anchorR, anchorC){
+    for(const [dr,dc] of shape.cells){
+      const r=anchorR+dr, c=anchorC+dc;
+      if(r<0||r>=SIZE||c<0||c>=SIZE) return false;
+      if(board[r][c]) return false;
+    }
+    return true;
+  }
+  function highlightPreview(shape, anchorR, anchorC){
+    renderBoard();
+    if(anchorR===null||anchorR===undefined) return;
+    const ok=canPlace(shape, anchorR, anchorC);
+    for(const [dr,dc] of shape.cells){
+      const r=anchorR+dr, c=anchorC+dc;
+      if(r>=0&&r<SIZE&&c>=0&&c<SIZE){
+        boardCells[r][c].style.background = ok ? 'rgba(255,255,255,0.4)' : 'rgba(255,80,80,0.4)';
+      }
+    }
+  }
+  function onPieceDown(e, idx){
+    if(ended) return;
+    ensureAudio();
+    const p=tray[idx];
+    if(!p || p.used) return;
+    dragging = {idx, shape:p.shape, lastCell:null};
+    e.preventDefault();
+  }
+  function onPointerMove(e){
+    if(!dragging) return;
+    const pos=cellFromPoint(e.clientX, e.clientY);
+    dragging.lastCell = pos;
+    if(pos) highlightPreview(dragging.shape, pos[0], pos[1]);
+    else renderBoard();
+  }
+  function onPointerUp(e){
+    if(!dragging) return;
+    const shape=dragging.shape, idx=dragging.idx, cell=dragging.lastCell;
+    dragging=null;
+    if(cell && canPlace(shape, cell[0], cell[1])) placePiece(shape, cell[0], cell[1], idx);
+    else renderBoard();
+  }
+  window.addEventListener('pointermove', onPointerMove);
+  window.addEventListener('pointerup', onPointerUp);
+
+  function placePiece(shape, anchorR, anchorC, idx){
+    for(const [dr,dc] of shape.cells){ board[anchorR+dr][anchorC+dc] = shape.color; }
+    tray[idx].used = true;
+    piecesUsed++;
+    sfxClick();
+    const fullRows=[]; const fullCols=[];
+    for(let r=0;r<SIZE;r++){ if(board[r].every(v=>v)) fullRows.push(r); }
+    for(let c=0;c<SIZE;c++){ let full=true; for(let r=0;r<SIZE;r++) if(!board[r][c]) full=false; if(full) fullCols.push(c); }
+    fullRows.forEach(r=>{ for(let c=0;c<SIZE;c++) board[r][c]=null; });
+    fullCols.forEach(c=>{ for(let r=0;r<SIZE;r++) board[r][c]=null; });
+    const clearedLines = fullRows.length+fullCols.length;
+    const gained = shape.cells.length*2 + clearedLines*SIZE*8;
+    score += gained;
+    if(clearedLines>0) sfxGood();
+    renderBoard();
+    updateHud();
+    if(tray.every(p=>p.used)) refillTray();
+    renderTray();
+    checkEnd();
+  }
+  function anyPlaceable(){
+    for(const p of tray){
+      if(p.used) continue;
+      for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++){ if(canPlace(p.shape,r,c)) return true; }
+    }
+    return false;
+  }
+  function checkEnd(){
+    if(ended) return;
+    if(score>=TARGET){
+      ended=true;
+      const ratio=score/TARGET;
+      const stars = ratio>=1.6?3: ratio>=1.15?2:1;
+      setTimeout(()=>cb.onWin(stars, '최종 점수 '+score+'점'), 300);
+      return;
+    }
+    if(piecesUsed>=PIECE_BUDGET || !anyPlaceable()){
+      ended=true;
+      setTimeout(()=>cb.onLose(piecesUsed>=PIECE_BUDGET?'블록을 모두 사용했어요.':'더 이상 놓을 자리가 없어요.'), 300);
+    }
+  }
+
+  refillTray(); renderBoard(); renderTray(); updateHud();
+  return {
+    destroy(){ window.removeEventListener('pointermove', onPointerMove); window.removeEventListener('pointerup', onPointerUp); }
+  };
 }
 
 /* ================= Init ================= */
