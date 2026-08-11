@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>퍼즐 갤럭시 - 우주 최고의 퍼즐 모음</title>
+<title>과일 갤럭시 - 미쳐가는 과일 합치기</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none; -webkit-user-select:none; touch-action:none; }
   html,body{ width:100%; height:100%; overflow:hidden; background:#0a0818; font-family:'Segoe UI','Apple SD Gothic Neo','Malgun Gothic',sans-serif; color:#fff; display:flex; align-items:center; justify-content:center; }
@@ -115,7 +115,7 @@
 <div id="wrap">
   <div id="topHud">
     <div class="side"><button id="backBtn" style="display:none;">←</button></div>
-    <div id="hudTitle">퍼즐 갤럭시</div>
+    <div id="hudTitle">과일 갤럭시</div>
     <div class="side" style="justify-content:flex-end;">
       <div id="hudStat" style="display:none;"></div>
       <button id="restartBtn" style="display:none;">⟳</button>
@@ -126,8 +126,8 @@
   <div id="screens">
     <section id="screen-hub" class="screen active">
       <div class="hubTitle">
-        <h1>🌌 퍼즐 갤럭시</h1>
-        <p>행성을 골라 퍼즐 여행을 떠나보세요</p>
+        <h1>🍉 과일 갤럭시</h1>
+        <p>맵을 골라 과일을 합쳐보세요</p>
       </div>
       <div id="worldList"></div>
     </section>
@@ -216,36 +216,54 @@ function worldTotalStars(worldId){ return (save[worldId]||[0,0,0,0,0]).reduce((a
 
 /* ================= World / Stage Definitions ================= */
 const WORLDS = [
-  { id:'merge', name:'과일 합치기', icon:'🍉', color:'#37b24d', desc:'합칠수록 미쳐가는 과일 게임 — 폭탄, 회전날, 동물모드까지',
+  { id:'classic', name:'클래식 과일', icon:'🍉', color:'#37b24d', desc:'합쳐서 수박까지! 갈수록 목표가 커져요',
     stages:[
-      {target:30,drops:18, label:'클래식'},
-      {target:65,drops:20, label:'클래식+'},
-      {target:110,drops:24, bomb:true, label:'💣 폭탄 과일'},
-      {target:160,drops:26, obstacle:true, label:'🌀 회전 장애물'},
-      {target:230,drops:30, bomb:true, obstacle:true, animal:true, label:'🔥 카오스 파티'},
+      {drops:40, goal:'tier', tierTarget:5, label:'1단계'},
+      {drops:36, goal:'tier', tierTarget:6, label:'2단계'},
+      {drops:32, goal:'tier', tierTarget:7, label:'3단계'},
+      {drops:30, goal:'tier', tierTarget:8, label:'4단계'},
+      {drops:28, goal:'tier', tierTarget:10, label:'🍉 진짜 수박!'},
     ] },
-  { id:'match3', name:'매치3 스매시', icon:'🍬', color:'#e64980', desc:'같은 색을 3개 이상 맞춰 스코어를 채우세요',
-    stages:[ {size:6,colors:3,moves:20,target:220}, {size:6,colors:4,moves:22,target:340}, {size:6,colors:5,moves:24,target:480}, {size:7,colors:5,moves:26,target:650}, {size:7,colors:6,moves:30,target:900} ] },
-  { id:'n2048', name:'넘버 2048', icon:'🔢', color:'#4dabf7', desc:'타일을 밀어서 목표 숫자를 만들어보세요',
-    stages:[ {target:32}, {target:64}, {target:128}, {target:256}, {target:512} ] },
-  { id:'slide', name:'슬라이딩 퍼즐', icon:'🧩', color:'#f9c74f', desc:'조각을 밀어서 순서대로 정렬하세요',
-    stages:[ {size:3,shuffles:15}, {size:3,shuffles:25}, {size:3,shuffles:35}, {size:4,shuffles:45}, {size:4,shuffles:60} ] },
-  { id:'flow', name:'플로우 커넥트', icon:'🌈', color:'#c77dff', desc:'같은 색 점을 겹치지 않게 연결하세요',
+  { id:'bomb', name:'폭탄 과일', icon:'💣', color:'#ff8787', desc:'폭탄 종류가 스테이지마다 늘어나요',
     stages:[
-      { size:5, dots:[ ['#ff6b6b',[[0,0],[0,4]]], ['#51cf66',[[2,0],[2,4]]], ['#4dabf7',[[4,0],[4,4]]] ] },
-      { size:5, dots:[ ['#ff6b6b',[[0,0],[0,4]]], ['#51cf66',[[4,0],[4,4]]], ['#4dabf7',[[1,0],[3,0]]], ['#ffd43b',[[1,4],[3,4]]] ] },
-      { size:6, dots:[ ['#ff6b6b',[[0,0],[0,5]]], ['#51cf66',[[5,0],[5,5]]], ['#4dabf7',[[1,0],[4,0]]], ['#ffd43b',[[1,5],[4,5]]] ] },
-      { size:6, dots:[ ['#ff6b6b',[[0,0],[0,5]]], ['#51cf66',[[5,0],[5,5]]], ['#4dabf7',[[1,0],[4,0]]], ['#ffd43b',[[1,5],[4,5]]], ['#cc5de8',[[2,1],[2,4]]] ] },
-      { size:7, dots:[ ['#ff6b6b',[[0,0],[0,6]]], ['#51cf66',[[6,0],[6,6]]], ['#4dabf7',[[1,0],[5,0]]], ['#ffd43b',[[1,6],[5,6]]], ['#cc5de8',[[3,1],[3,5]]] ] },
+      {drops:26, target:60, bombTypes:['score'], bombChance:0.16, label:'점수 폭탄'},
+      {drops:26, target:90, bombTypes:['score','dud'], bombChance:0.18, label:'꽝 폭탄 등장'},
+      {drops:28, target:130, bombTypes:['dud','shock'], bombChance:0.2, label:'충격파 폭탄'},
+      {drops:28, target:170, bombTypes:['score','dud','shock'], bombChance:0.22, label:'폭탄 3종 세트'},
+      {drops:30, target:230, bombTypes:['score','dud','shock'], bombChance:0.28, label:'💥 폭탄 대잔치'},
     ] },
-  { id:'lights', name:'라이트 아웃', icon:'💡', color:'#ffd166', desc:'모든 불을 꺼서 미션을 완료하세요',
-    stages:[ {size:3,scramble:3}, {size:3,scramble:4}, {size:3,scramble:5}, {size:4,scramble:6}, {size:4,scramble:8} ] },
-  { id:'maze', name:'미로 탈출', icon:'🔲', color:'#748ffc', desc:'미로를 통과해 출구까지 이동하세요',
-    stages:[ {size:5}, {size:6}, {size:7}, {size:9}, {size:11} ] },
-  { id:'nonogram', name:'노노그램', icon:'🖼️', color:'#63e6be', desc:'힌트 숫자를 보고 그림을 완성하세요',
-    stages:[ {id:'heart5'}, {id:'star5'}, {id:'smile6'}, {id:'tree7'}, {id:'boat8'} ] },
-  { id:'blockfit', name:'블록 채우기', icon:'🧱', color:'#e599f7', desc:'블록을 놓아 가로·세로 줄을 채워 없애세요',
-    stages:[ {size:6,target:260,pieces:20}, {size:6,target:420,pieces:24}, {size:7,target:620,pieces:28}, {size:7,target:850,pieces:32}, {size:8,target:1150,pieces:36} ] },
+  { id:'obstacle', name:'회전 장애물', icon:'🌀', color:'#748ffc', desc:'통나무가 갈수록 길고 많아져요',
+    stages:[
+      {drops:26, target:70, obstacleCount:1, obstacleLen:0.22, obstacleSpeed:0.5, label:'통나무 1개'},
+      {drops:26, target:110, obstacleCount:1, obstacleLen:0.34, obstacleSpeed:0.58, label:'더 길어진 통나무'},
+      {drops:28, target:150, obstacleCount:2, obstacleLen:0.42, obstacleSpeed:0.62, label:'통나무 2개'},
+      {drops:28, target:190, obstacleCount:2, obstacleLen:0.5, obstacleSpeed:0.7, label:'더 크고 빠르게'},
+      {drops:30, target:250, obstacleCount:3, obstacleLen:0.58, obstacleSpeed:0.78, label:'🌀 회전날 3개'},
+    ] },
+  { id:'animal', name:'동물농장', icon:'🐘', color:'#ffa94d', desc:'병아리부터 매머드까지! 히트박스도 생긴대로',
+    stages:[
+      {drops:30, animal:true, goal:'score', target:70, label:'병아리부터 시작'},
+      {drops:28, animal:true, goal:'tier', tierTarget:3, label:'돼지까지!'},
+      {drops:28, animal:true, goal:'score', target:160, label:'점수 목표'},
+      {drops:26, animal:true, goal:'tier', tierTarget:5, label:'코끼리까지!'},
+      {drops:26, animal:true, goal:'tier', tierTarget:6, label:'🦣 매머드 완성!'},
+    ] },
+  { id:'gravity', name:'중력 미로', icon:'🧭', color:'#63e6be', desc:'중력 방향이 게임 중에 계속 바뀌어요! 표지판을 잘 보세요',
+    stages:[
+      {drops:26, target:60, gravityDir:'down', gravitySwitch:true, gravitySwitchPeriod:6.5, label:'⬇️ 천천히 전환'},
+      {drops:28, target:90, gravityDir:'right', gravitySwitch:true, gravitySwitchPeriod:5.5, label:'➡️ 조금 더 빠르게'},
+      {drops:28, target:110, gravityDir:'left', gravitySwitch:true, gravitySwitchPeriod:4.5, label:'⬅️ 빠른 전환'},
+      {drops:30, target:140, gravityDir:'up', gravitySwitch:true, gravitySwitchPeriod:3.6, label:'⬆️ 더 빠르게!'},
+      {drops:34, target:180, gravityDir:'spin', label:'🌪️ 빙글빙글 중력'},
+    ] },
+  { id:'meteor', name:'운석 낙하', icon:'☄️', color:'#ff922b', desc:'하늘에서 운석이 떨어져요! 충격으로 과일이 와르르 쏟아져요',
+    stages:[
+      {drops:26, target:70, meteorPeriod:5.5, label:'가끔 떨어지는 운석'},
+      {drops:28, target:110, meteorPeriod:4.4, label:'더 자주 떨어짐'},
+      {drops:28, target:150, meteorPeriod:3.5, label:'운석비'},
+      {drops:30, target:190, meteorPeriod:2.8, label:'거센 운석비'},
+      {drops:32, target:250, meteorPeriod:2.2, label:'☄️ 운석 폭풍'},
+    ] },
 ];
 
 function isWorldUnlocked(wi){
@@ -277,7 +295,7 @@ function showScreen(name){
 function goHub(){
   nav = ['hub'];
   destroyActiveGame();
-  hudTitle.textContent = '퍼즐 갤럭시';
+  hudTitle.textContent = '과일 갤럭시';
   renderHub();
   showScreen('hub');
 }
@@ -430,55 +448,75 @@ function launchStage(wi, si){
       showResult(false, 0, subtitle||'목표를 달성하지 못했어요.');
     }
   };
-  if(w.id==='merge') activeGame = mountMerge(area, cfg, cb);
-  else if(w.id==='match3') activeGame = mountMatch3(area, cfg, cb);
-  else if(w.id==='n2048') activeGame = mount2048(area, cfg, cb);
-  else if(w.id==='slide') activeGame = mountSlide(area, cfg, cb);
-  else if(w.id==='flow') activeGame = mountFlow(area, cfg, cb);
-  else if(w.id==='lights') activeGame = mountLights(area, cfg, cb);
-  else if(w.id==='memory') activeGame = mountMemory(area, cfg, cb);
-  else if(w.id==='maze') activeGame = mountMaze(area, cfg, cb);
-  else if(w.id==='sudoku') activeGame = mountSudoku(area, cfg, cb);
-  else if(w.id==='nonogram') activeGame = mountNonogram(area, cfg, cb);
-  else if(w.id==='blockfit') activeGame = mountBlockFit(area, cfg, cb);
+  activeGame = mountMerge(area, Object.assign({mapId:w.id}, cfg), cb);
 }
 
 /* =========================================================================
    GAME 1: MERGE (fruit)
    ========================================================================= */
+const _emojiShapeCache = {};
+function measureEmojiShape(emoji){
+  if(_emojiShapeCache[emoji]) return _emojiShapeCache[emoji];
+  const size=64;
+  const c=document.createElement('canvas'); c.width=size; c.height=size;
+  const cx=c.getContext('2d');
+  cx.font=(size*0.85)+'px sans-serif';
+  cx.textAlign='center'; cx.textBaseline='middle';
+  cx.fillText(emoji, size/2, size/2);
+  let minX=size,maxX=0,minY=size,maxY=0,found=false;
+  try{
+    const data=cx.getImageData(0,0,size,size).data;
+    for(let y=0;y<size;y++){
+      for(let x=0;x<size;x++){
+        if(data[(y*size+x)*4+3]>20){
+          found=true;
+          if(x<minX)minX=x; if(x>maxX)maxX=x;
+          if(y<minY)minY=y; if(y>maxY)maxY=y;
+        }
+      }
+    }
+  }catch(e){}
+  const result = found ? {wRatio:Math.max(0.35,(maxX-minX+1)/size), hRatio:Math.max(0.35,(maxY-minY+1)/size)} : {wRatio:0.8,hRatio:0.8};
+  _emojiShapeCache[emoji]=result;
+  return result;
+}
 function mountMerge(area, cfg, cb){
   const FRUITS = [
-    { r:14, color:'#ff6b6b', hi:'#ffb3b3', score:1 },
-    { r:19, color:'#ffa94d', hi:'#ffd8a8', score:3 },
-    { r:25, color:'#ff922b', hi:'#ffc078', score:6 },
-    { r:32, color:'#f9d923', hi:'#fff3bf', score:10 },
-    { r:40, color:'#82c91e', hi:'#c0eb75', score:15 },
-    { r:49, color:'#ff4d6d', hi:'#ff8fa3', score:21 },
-    { r:59, color:'#e64980', hi:'#faa2c1', score:28 },
-    { r:71, color:'#9c36b5', hi:'#e599f7', score:36 },
-    { r:85, color:'#37b24d', hi:'#8ce99a', score:45 },
-    { r:102,color:'#2f9e44', hi:'#69db7c', score:55 },
-    { r:124,color:'#2b8a3e', hi:'#40c057', score:100 },
+    { r:14, color:'#ff6b6b', hi:'#ffb3b3', score:1, name:'체리', emoji:'🍒' },
+    { r:19, color:'#ffa94d', hi:'#ffd8a8', score:3, name:'귤', emoji:'🍊' },
+    { r:25, color:'#fff3bf', hi:'#fffde0', score:6, name:'레몬', emoji:'🍋' },
+    { r:32, color:'#8ce99a', hi:'#d3f9d8', score:10, name:'키위', emoji:'🥝' },
+    { r:40, color:'#ff8787', hi:'#ffc9c9', score:15, name:'딸기', emoji:'🍓' },
+    { r:49, color:'#ff6b6b', hi:'#ffa8a8', score:21, name:'토마토', emoji:'🍅' },
+    { r:59, color:'#ffb28a', hi:'#ffd8be', score:28, name:'복숭아', emoji:'🍑' },
+    { r:71, color:'#9c36b5', hi:'#e599f7', score:36, name:'포도', emoji:'🍇' },
+    { r:85, color:'#ff8787', hi:'#ffc9c9', score:45, name:'사과', emoji:'🍎' },
+    { r:102,color:'#d9b38c', hi:'#ecd4b4', score:55, name:'배', emoji:'🍐' },
+    { r:124,color:'#2b8a3e', hi:'#40c057', score:100, name:'수박', emoji:'🍉' },
   ];
   const ANIMALS = [
-    { r:14, color:'#fff3bf', hi:'#fff9db', score:1, emoji:'🐣', weight:0.55 },
-    { r:19, color:'#ffe066', hi:'#fff3bf', score:3, emoji:'🐤', weight:0.65 },
-    { r:25, color:'#ffd43b', hi:'#ffe066', score:6, emoji:'🐥', weight:0.78 },
-    { r:32, color:'#ffc078', hi:'#ffd8a8', score:10, emoji:'🐔', weight:0.92 },
-    { r:40, color:'#ffa8a8', hi:'#ffc9c9', score:15, emoji:'🐷', weight:1.15 },
-    { r:49, color:'#eebefa', hi:'#f3d9fa', score:21, emoji:'🐶', weight:1.3 },
-    { r:59, color:'#b2f2bb', hi:'#d3f9d8', score:28, emoji:'🐱', weight:1.45 },
-    { r:71, color:'#a5d8ff', hi:'#d0ebff', score:36, emoji:'🐮', weight:1.6 },
-    { r:85, color:'#ffd8a8', hi:'#ffe8cc', score:45, emoji:'🦁', weight:1.75 },
-    { r:102,color:'#d0bfff', hi:'#e5dbff', score:55, emoji:'🐻', weight:1.9 },
-    { r:124,color:'#ced4da', hi:'#e9ecef', score:100, emoji:'🐘', weight:2.1 },
+    { r:18, color:'#fff3bf', hi:'#fff9db', score:2, emoji:'🐥', weight:0.6, name:'병아리' },
+    { r:28, color:'#ffe066', hi:'#fff3bf', score:6, emoji:'🐓', weight:0.85, name:'닭' },
+    { r:40, color:'#e9ecef', hi:'#f8f9fa', score:16, emoji:'🐏', weight:1.1, name:'양' },
+    { r:54, color:'#ffa8a8', hi:'#ffc9c9', score:36, emoji:'🐖', weight:1.4, name:'돼지' },
+    { r:70, color:'#d9a679', hi:'#e8c9a3', score:75, emoji:'🐂', weight:1.7, name:'소' },
+    { r:90, color:'#adb5bd', hi:'#ced4da', score:150, emoji:'🐘', weight:2.0, name:'코끼리' },
+    { r:114,color:'#8d6e5c', hi:'#a98b74', score:300, emoji:'🦣', weight:2.4, name:'매머드' },
   ];
   const SKIN = cfg.animal ? ANIMALS : FRUITS;
   const BOMB_R = 30;
+  const BOMB_COLORS = { score:'#ff922b', dud:'#868e96', shock:'#ff6b6b' };
+  const DIRS = ['down','right','left','up'];
+  let GDIR = cfg.gravityDir || 'down';
   const canvas = document.createElement('canvas');
   area.appendChild(canvas);
   const ctx = canvas.getContext('2d');
-  let W=0,H=0,DPR=1;
+  let W=0,H=0,DPR=1,simW=0,simH=0;
+  function computeSimDims(){
+    simW = (GDIR==='right'||GDIR==='left') ? H : W;
+    simH = (GDIR==='right'||GDIR==='left') ? W : H;
+    DANGER_Y = simH*0.06;
+  }
   function resize(){
     const rect = area.getBoundingClientRect();
     DPR = Math.min(window.devicePixelRatio||1,2);
@@ -486,56 +524,111 @@ function mountMerge(area, cfg, cb){
     canvas.style.width=W+'px'; canvas.style.height=H+'px';
     canvas.width=Math.floor(W*DPR); canvas.height=Math.floor(H*DPR);
     ctx.setTransform(DPR,0,0,DPR,0,0);
-    DANGER_Y = H*0.06;
+    computeSimDims();
   }
+  function posSimToPhys(dir,sx,sy){
+    switch(dir){
+      case 'right': return [sy, sx];
+      case 'left': return [W-sy, sx];
+      case 'up': return [sx, H-sy];
+      default: return [sx, sy];
+    }
+  }
+  function posPhysToSim(dir,px,py){
+    switch(dir){
+      case 'right': return [py, px];
+      case 'left': return [py, W-px];
+      case 'up': return [px, H-py];
+      default: return [px, py];
+    }
+  }
+  function vecSimToPhys(dir,vx,vy){
+    switch(dir){ case 'right': return [vy,vx]; case 'left': return [-vy,vx]; case 'up': return [vx,-vy]; default: return [vx,vy]; }
+  }
+  function vecPhysToSim(dir,vx,vy){
+    switch(dir){ case 'right': return [vy,vx]; case 'left': return [vy,-vx]; case 'up': return [vx,-vy]; default: return [vx,vy]; }
+  }
+  function simToPhys(sx,sy){ return posSimToPhys(GDIR,sx,sy); }
+  function physToSim(px,py){ return posPhysToSim(GDIR,px,py); }
   let DANGER_Y=0;
   const GRAVITY=1400, DAMPING=0.985, WALL_R=0.28, FLOOR_R=0.22, FRUIT_R=0.12;
-  let bodies=[], idc=1, score=0, dropsLeft=cfg.drops, dangerTimer=0, ended=false;
-  let dropX=0, currentIndex=0, nextIndex=0, canDrop=true, aiming=false;
+  let bodies=[], idc=1, score=0, dropsLeft=cfg.drops, dangerTimer=0, ended=false, maxTierEver=0;
+  let dropX=0, currentIndex=0, nextIndex=0, currentBombType=null, nextBombType=null, canDrop=true, aiming=false;
   let particles=[], floatTexts=[], shake=0;
-  let obstacleAngle=0;
+  let obstacleAngle=0, spinAngle=0, totalT=0, exhaustTimer=0;
+  let gravitySwitchTimer = cfg.gravitySwitch ? (cfg.gravitySwitchPeriod||5) : Infinity;
+  let meteors=[], meteorTimer = cfg.meteorPeriod ? cfg.meteorPeriod*0.6 : Infinity;
 
-  function makeBody(x,y,index){
-    if(index===-1) return {id:idc++,x,y,vx:0,vy:0,index:-1,isBomb:true,r:BOMB_R,merging:false,spawnT:0,drawScale:0.6,weight:1};
-    return {id:idc++,x,y,vx:0,vy:0,index,r:SKIN[index].r,merging:false,spawnT:0,drawScale:0.6,weight:(SKIN[index].weight||1)};
+  function shapeFor(f){
+    if(!f.emoji) return {rx:f.r, ry:f.r};
+    const shape = measureEmojiShape(f.emoji);
+    const maxRatio = Math.max(shape.wRatio, shape.hRatio);
+    return { rx: f.r*(shape.wRatio/maxRatio), ry: f.r*(shape.hRatio/maxRatio) };
   }
+  function makeBody(x,y,index,bombType){
+    if(index===-1) return {id:idc++,x,y,vx:0,vy:0,index:-1,isBomb:true,bombType:bombType||'score',fusing:false,fuseTimer:0,r:BOMB_R,rx:BOMB_R,ry:BOMB_R,merging:false,spawnT:0,drawScale:0.6,weight:1};
+    const f=SKIN[index];
+    const {rx,ry} = shapeFor(f);
+    return {id:idc++,x,y,vx:0,vy:0,index,rx,ry,r:Math.max(rx,ry),merging:false,spawnT:0,drawScale:0.6,weight:(f.weight||1)};
+  }
+  function effRadius(b, angle){
+    if(Math.abs(b.rx-b.ry)<0.5) return b.rx;
+    const c=Math.cos(angle), s=Math.sin(angle);
+    return 1/Math.hypot(c/b.rx, s/b.ry);
+  }
+  function pickBombType(){ const t=cfg.bombTypes||['score']; return t[Math.floor(Math.random()*t.length)]; }
   function randomDropIndex(){
-    if(cfg.bomb && Math.random()<0.13) return -1;
+    if(cfg.bombTypes && Math.random()<(cfg.bombChance||0.15)) return -1;
     const r=Math.random();
     if(r<0.45) return 0; if(r<0.75) return 1; if(r<0.92) return 2; return 3;
   }
-  function drawFruit(x,y,r,index,alpha){
+  function drawFruit(x,y,rx,ry,index,alpha,bombType,fusing){
     ctx.save(); ctx.globalAlpha = alpha===undefined?1:alpha;
     if(index===-1){
-      const grad=ctx.createRadialGradient(x-r*0.3,y-r*0.3,r*0.1,x,y,r);
+      let ringColor = BOMB_COLORS[bombType||'score'];
+      if(fusing){ ringColor = (Math.floor(totalT*10)%2===0) ? '#ffffff' : '#ff0000'; }
+      const grad=ctx.createRadialGradient(x-rx*0.3,y-ry*0.3,rx*0.1,x,y,rx);
       grad.addColorStop(0,'#495057'); grad.addColorStop(1,'#1a1a1a');
-      ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fillStyle=grad; ctx.fill();
-      ctx.lineWidth=Math.max(1,r*0.06); ctx.strokeStyle='#ff6b6b'; ctx.stroke();
-      ctx.font=(r*1.2)+'px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.beginPath(); ctx.arc(x,y,rx,0,Math.PI*2); ctx.fillStyle=grad; ctx.fill();
+      ctx.lineWidth=Math.max(2,rx*0.09); ctx.strokeStyle=ringColor; ctx.stroke();
+      ctx.font=(rx*1.2)+'px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
       ctx.fillText('💣', x, y+1);
       ctx.restore();
       return;
     }
     const f=SKIN[index];
-    const grad = ctx.createRadialGradient(x-r*0.35,y-r*0.35,r*0.1,x,y,r);
+    const grad = ctx.createRadialGradient(x-rx*0.35,y-ry*0.35,Math.min(rx,ry)*0.1,x,y,Math.max(rx,ry));
     grad.addColorStop(0,f.hi); grad.addColorStop(1,f.color);
-    ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fillStyle=grad; ctx.fill();
-    ctx.lineWidth=Math.max(1,r*0.04); ctx.strokeStyle='rgba(0,0,0,0.15)'; ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(x,y,rx,ry,0,0,Math.PI*2); ctx.fillStyle=grad; ctx.fill();
+    ctx.lineWidth=Math.max(1,Math.min(rx,ry)*0.05); ctx.strokeStyle='rgba(0,0,0,0.15)'; ctx.stroke();
     if(f.emoji){
-      ctx.font=(r*1.15)+'px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.font=(Math.max(rx,ry)*1.5)+'px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
       ctx.fillText(f.emoji, x, y+1);
     } else {
-      ctx.beginPath(); ctx.arc(x-r*0.32,y-r*0.32,r*0.22,0,Math.PI*2); ctx.fillStyle='rgba(255,255,255,0.35)'; ctx.fill();
+      ctx.beginPath(); ctx.arc(x-rx*0.32,y-ry*0.32,Math.min(rx,ry)*0.22,0,Math.PI*2); ctx.fillStyle='rgba(255,255,255,0.35)'; ctx.fill();
     }
     ctx.restore();
   }
-  function updateHud(){ cb.setHud('점수 '+score+' / '+cfg.target+' · 남은 드롭 '+dropsLeft); }
+  function updateHud(){
+    if(cfg.goal==='tier'){
+      const cur = maxTierEver>0 ? SKIN[maxTierEver].name : '-';
+      cb.setHud('현재 '+cur+' · 남은 드롭 '+dropsLeft);
+    } else {
+      cb.setHud('점수 '+score+' / '+cfg.target+' · 남은 드롭 '+dropsLeft);
+    }
+  }
   (function(){
-    let goalMsg = '목표 점수 '+cfg.target+'점 · 드롭 '+cfg.drops+'회 이내';
+    let goalMsg = cfg.goal==='tier'
+      ? (SKIN[cfg.tierTarget].name+' 만들기 · 드롭 '+cfg.drops+'회 이내')
+      : ('목표 점수 '+cfg.target+'점 · 드롭 '+cfg.drops+'회 이내');
     const extras=[];
-    if(cfg.bomb) extras.push('💣 폭탄 과일은 주변을 한번에 날려요');
-    if(cfg.obstacle) extras.push('🌀 회전 장애물을 피하세요');
-    if(cfg.animal) extras.push('🐘 무거운 동물일수록 빨리 떨어져요');
+    if(cfg.bombTypes) extras.push('💣 폭탄 종류를 잘 살펴보세요');
+    if(cfg.obstacleCount) extras.push('🌀 회전 통나무를 피하세요');
+    if(cfg.animal) extras.push('무거운 동물일수록 빨리 떨어져요');
+    if(cfg.gravityDir==='spin') extras.push('🌪️ 중력이 계속 회전해요');
+    else if(cfg.gravitySwitch) extras.push('🧭 중력 방향이 계속 바뀌어요');
+    else if(cfg.gravityDir) extras.push('🧭 중력 방향을 확인하세요');
+    if(cfg.meteorPeriod) extras.push('☄️ 하늘에서 운석이 떨어져요');
     if(extras.length) goalMsg += ' — ' + extras.join(' · ');
     cb.setGoal(goalMsg);
   })();
@@ -548,27 +641,29 @@ function mountMerge(area, cfg, cb){
   }
   function addFloat(x,y,text,color){ floatTexts.push({x,y,text,age:0,life:0.9,color:color||'#ffe066'}); }
 
-  function getX(e){
-    let clientX;
-    if(e.touches && e.touches.length) clientX=e.touches[0].clientX;
-    else if(e.changedTouches && e.changedTouches.length) clientX=e.changedTouches[0].clientX;
-    else clientX=e.clientX;
-    const rect=canvas.getBoundingClientRect();
-    return clientX-rect.left;
-  }
-  function curR(){ return currentIndex===-1 ? BOMB_R : SKIN[currentIndex].r; }
+  function curShape(){ return currentIndex===-1 ? {rx:BOMB_R,ry:BOMB_R} : shapeFor(SKIN[currentIndex]); }
   function onDown(e){ if(ended) return; ensureAudio(); aiming=true; updateAim(e); e.preventDefault(); }
   function onMove(e){ if(!aiming) return; updateAim(e); e.preventDefault(); }
   function onUp(e){ if(!aiming) return; aiming=false; doDrop(); e.preventDefault(); }
-  function updateAim(e){ const r=curR(); let x=getX(e); x=Math.max(r+4,Math.min(W-r-4,x)); dropX=x; }
+  function updateAim(e){
+    const {rx} = curShape();
+    let clientX,clientY;
+    if(e.touches && e.touches.length){ clientX=e.touches[0].clientX; clientY=e.touches[0].clientY; }
+    else if(e.changedTouches && e.changedTouches.length){ clientX=e.changedTouches[0].clientX; clientY=e.changedTouches[0].clientY; }
+    else { clientX=e.clientX; clientY=e.clientY; }
+    const rect=canvas.getBoundingClientRect();
+    const [sx] = physToSim(clientX-rect.left, clientY-rect.top);
+    dropX = Math.max(rx+4, Math.min(simW-rx-4, sx));
+  }
   function doDrop(){
     if(!canDrop || ended || dropsLeft<=0) return;
     canDrop=false;
-    const r=curR();
-    bodies.push(makeBody(dropX,r+4,currentIndex));
+    const {ry} = curShape();
+    bodies.push(makeBody(dropX,ry+4,currentIndex,currentBombType));
     beep(220,0.1,'triangle',0.1);
     dropsLeft--;
-    currentIndex=nextIndex; nextIndex=randomDropIndex();
+    currentIndex=nextIndex; currentBombType=nextBombType;
+    nextIndex=randomDropIndex(); nextBombType = nextIndex===-1?pickBombType():null;
     updateHud();
     setTimeout(()=>{ canDrop=true; }, 260);
   }
@@ -579,74 +674,205 @@ function mountMerge(area, cfg, cb){
   canvas.addEventListener('touchmove', onMove, {passive:false});
   canvas.addEventListener('touchend', onUp, {passive:false});
 
-  function obstacleEndpoints(){
-    const cx=W/2, cy=H*0.48;
-    const len = Math.min(W,H)*0.34;
-    const dx=Math.cos(obstacleAngle)*len, dy=Math.sin(obstacleAngle)*len;
-    return {x1:cx-dx,y1:cy-dy,x2:cx+dx,y2:cy+dy,cx,cy};
-  }
-  function resolveObstacle(b, dt){
-    const {x1,y1,x2,y2,cx,cy} = obstacleEndpoints();
-    const dx=x2-x1, dy=y2-y1, len2=dx*dx+dy*dy;
-    let t=((b.x-x1)*dx+(b.y-y1)*dy)/len2;
-    t=Math.max(0,Math.min(1,t));
-    const px=x1+t*dx, py=y1+t*dy;
-    const distX=b.x-px, distY=b.y-py, dist=Math.hypot(distX,distY);
-    const barHalf=7;
-    const minDist=b.r+barHalf;
-    if(dist<minDist){
-      const nx = dist>0.01 ? distX/dist : 1, ny = dist>0.01 ? distY/dist : 0;
-      b.x += nx*(minDist-dist); b.y += ny*(minDist-dist);
-      const radius=Math.hypot(px-cx,py-cy);
-      const angVel=0.75;
-      const tSpeed=angVel*radius;
-      const tx=-Math.sin(obstacleAngle), ty=Math.cos(obstacleAngle);
-      const dir = ((tx*(b.x-cx)+ty*(b.y-cy))>=0) ? 1 : -1;
-      b.vx += tx*tSpeed*0.6*dir; b.vy += ty*tSpeed*0.6*dir;
+  function obstacleBlades(){
+    const cx=simW/2, cy=simH*0.48;
+    const len = Math.min(simW,simH)*(cfg.obstacleLen||0.3);
+    const n = cfg.obstacleCount||1;
+    const blades=[];
+    for(let i=0;i<n;i++){
+      const ang = obstacleAngle + i*(Math.PI*2/n);
+      const dx=Math.cos(ang)*len, dy=Math.sin(ang)*len;
+      blades.push({x1:cx-dx,y1:cy-dy,x2:cx+dx,y2:cy+dy,cx,cy,ang});
     }
+    return blades;
   }
-  function explodeBomb(bomb){
-    bomb.merging=true;
-    let bonus=0;
-    for(const other of bodies){
-      if(other===bomb || other.merging) continue;
-      const dist=Math.hypot(other.x-bomb.x, other.y-bomb.y);
-      if(dist < 90+other.r){
-        other.merging=true;
-        if(!other.isBomb) bonus += (SKIN[other.index] ? SKIN[other.index].score : 0)*1.4;
-        spawnParticles(other.x,other.y, other.isBomb?'#ff6b6b':SKIN[other.index].color, 6, 0.8);
+  function resolveObstacle(b){
+    for(const bl of obstacleBlades()){
+      const dx=bl.x2-bl.x1, dy=bl.y2-bl.y1, len2=dx*dx+dy*dy;
+      let t=((b.x-bl.x1)*dx+(b.y-bl.y1)*dy)/len2;
+      t=Math.max(0,Math.min(1,t));
+      const px=bl.x1+t*dx, py=bl.y1+t*dy;
+      const distX=b.x-px, distY=b.y-py, dist=Math.hypot(distX,distY);
+      const barHalf=8, minDist=b.r+barHalf;
+      if(dist<minDist){
+        const nx = dist>0.01 ? distX/dist : 1, ny = dist>0.01 ? distY/dist : 0;
+        b.x += nx*(minDist-dist); b.y += ny*(minDist-dist);
+        const radius=Math.hypot(px-bl.cx,py-bl.cy);
+        const tSpeed=(cfg.obstacleSpeed||0.7)*radius;
+        const tx=-Math.sin(bl.ang), ty=Math.cos(bl.ang);
+        const dir = ((tx*(b.x-bl.cx)+ty*(b.y-bl.cy))>=0) ? 1 : -1;
+        b.vx += tx*tSpeed*0.6*dir; b.vy += ty*tSpeed*0.6*dir;
       }
     }
-    score += Math.round(bonus)+5;
-    addFloat(bomb.x, bomb.y-BOMB_R-10, '💥 +'+(Math.round(bonus)+5), '#ffa8a8');
-    spawnParticles(bomb.x,bomb.y,'#ff922b',22,1.6);
-    beep(90,0.28,'sawtooth',0.22); beep(60,0.35,'sawtooth',0.18,0.05);
+  }
+  function spawnMeteor(){
+    const sx = 30+Math.random()*(simW-60);
+    const speed = 850+Math.random()*220;
+    meteors.push({x:sx, y:-30, vx:(Math.random()*160-80), vy:speed, r:20, trail:[], dead:false});
+  }
+  function meteorImpact(m){
+    if(m.dead) return;
+    m.dead=true;
+    for(const other of bodies){
+      if(other.merging) continue;
+      const dx=other.x-m.x, dy=other.y-m.y, dist=Math.max(20,Math.hypot(dx,dy));
+      if(dist<150){
+        const force=(150-dist)*7;
+        other.vx += (dx/dist)*force; other.vy += (dy/dist)*force - 60;
+      }
+    }
+    spawnParticles(m.x,m.y,'#ff922b',26,1.8);
+    shake=Math.max(shake,15);
+    beep(75,0.32,'sawtooth',0.22);
+  }
+  function updateMeteors(dt){
+    if(!cfg.meteorPeriod) return;
+    meteorTimer -= dt;
+    if(meteorTimer<=0){ spawnMeteor(); meteorTimer = cfg.meteorPeriod*(0.75+Math.random()*0.5); }
+    for(const m of meteors){
+      if(m.dead) continue;
+      m.trail.push({x:m.x,y:m.y,age:0});
+      m.x+=m.vx*dt; m.y+=m.vy*dt;
+      for(const b of bodies){
+        if(b.merging) continue;
+        const dist=Math.hypot(b.x-m.x,b.y-m.y);
+        if(dist < b.r+m.r){ meteorImpact(m); break; }
+      }
+      if(m.y>simH+50) m.dead=true;
+      m.trail.forEach(t=>t.age+=dt);
+      m.trail=m.trail.filter(t=>t.age<0.25);
+    }
+    meteors=meteors.filter(m=>!m.dead);
+  }
+  function switchGravity(newDir){
+    if(newDir===GDIR) return;
+    const oldDir=GDIR;
+    const converted = bodies.map(b=>{
+      const [px,py]=posSimToPhys(oldDir,b.x,b.y);
+      const [pvx,pvy]=vecSimToPhys(oldDir,b.vx,b.vy);
+      return {b,px,py,pvx,pvy};
+    });
+    GDIR=newDir;
+    computeSimDims();
+    for(const {b,px,py,pvx,pvy} of converted){
+      const [sx,sy]=posPhysToSim(newDir,px,py);
+      const [svx,svy]=vecPhysToSim(newDir,pvx,pvy);
+      b.x=sx; b.y=sy; b.vx=svx; b.vy=svy;
+    }
+    dropX = simW/2;
+    dangerTimer = 0;
+    showGravityBanner(newDir);
+  }
+  function detonate(bomb, silent){
+    bomb.merging=true;
+    let bonus=0;
+    if(!silent){
+      for(const other of bodies){
+        if(other===bomb || other.merging) continue;
+        const dist=Math.hypot(other.x-bomb.x, other.y-bomb.y);
+        if(dist < 90+other.r){
+          other.merging=true;
+          if(!other.isBomb && bomb.bombType==='score') bonus += (SKIN[other.index] ? SKIN[other.index].score : 0)*1.4;
+          spawnParticles(other.x,other.y, other.isBomb?'#ff6b6b':SKIN[other.index].color, 6, 0.8);
+        }
+      }
+    }
+    if(bomb.bombType==='shock'){
+      for(const other of bodies){
+        if(other===bomb || other.merging) continue;
+        const dx=other.x-bomb.x, dy=other.y-bomb.y, dist=Math.max(20,Math.hypot(dx,dy));
+        if(dist<160){
+          const force=(160-dist)*9;
+          other.vx += (dx/dist)*force; other.vy += (dy/dist)*force;
+        }
+      }
+      addFloat(bomb.x, bomb.y-BOMB_R-10, '💨 충격파!', '#ff6b6b');
+      beep(70,0.32,'sine',0.2);
+    } else if(bomb.bombType==='dud'){
+      addFloat(bomb.x, bomb.y-BOMB_R-10, '꽝!', '#868e96');
+      beep(120,0.2,'triangle',0.14);
+    } else {
+      score += Math.round(bonus)+5;
+      addFloat(bomb.x, bomb.y-BOMB_R-10, '💥 +'+(Math.round(bonus)+5), '#ffa8a8');
+      beep(90,0.28,'sawtooth',0.22); beep(60,0.35,'sawtooth',0.18,0.05);
+      updateHud();
+      if(cfg.goal!=='tier' && score>=cfg.target && !ended) endWin();
+    }
+    spawnParticles(bomb.x,bomb.y, bomb.bombType==='score'?'#ff922b':bomb.bombType==='shock'?'#ff6b6b':'#868e96', 20, 1.4);
     shake = Math.max(shake, 10);
-    updateHud();
-    if(score>=cfg.target && !ended) endWin();
+  }
+
+  function separationPass(){
+    for(let i=0;i<bodies.length;i++){
+      const a=bodies[i]; if(a.merging||a.isBomb) continue;
+      for(let j=i+1;j<bodies.length;j++){
+        const b=bodies[j]; if(b.merging||b.isBomb) continue;
+        const dx=b.x-a.x, dy=b.y-a.y, dist=Math.hypot(dx,dy)||0.001;
+        const angle=Math.atan2(dy,dx);
+        const ea=effRadius(a,angle), eb=effRadius(b,angle), minDist=ea+eb;
+        if(dist<minDist){
+          const overlap=(minDist-dist)/2, nx=dx/dist, ny=dy/dist, total=ea+eb, aR=eb/total, bR=ea/total;
+          a.x-=nx*overlap*aR*2; a.y-=ny*overlap*aR*2; b.x+=nx*overlap*bR*2; b.y+=ny*overlap*bR*2;
+        }
+      }
+    }
   }
 
   function step(dt){
     dt=Math.min(dt,1/30);
-    if(cfg.obstacle) obstacleAngle += dt*0.75;
+    totalT += dt;
+    if(cfg.obstacleCount) obstacleAngle += dt*(cfg.obstacleSpeed||0.7);
+    if(GDIR==='spin') spinAngle += dt*0.6;
+    if(cfg.gravitySwitch){
+      gravitySwitchTimer -= dt;
+      if(gravitySwitchTimer<=0){
+        let next; do{ next=DIRS[Math.floor(Math.random()*DIRS.length)]; }while(next===GDIR);
+        switchGravity(next);
+        gravitySwitchTimer = cfg.gravitySwitchPeriod||5;
+      }
+    }
+    updateMeteors(dt);
     for(const b of bodies){
       if(b.merging) continue;
       b.spawnT+=dt; b.drawScale=0.6+0.4*Math.min(1,b.spawnT/0.15);
-      b.vy+=GRAVITY*(b.weight||1)*dt; b.x+=b.vx*dt; b.y+=b.vy*dt; b.vx*=DAMPING; b.vy*=DAMPING;
-      if(b.x-b.r<0){ b.x=b.r; b.vx=-b.vx*WALL_R; }
-      if(b.x+b.r>W){ b.x=W-b.r; b.vx=-b.vx*WALL_R; }
-      if(b.y+b.r>H){ b.y=H-b.r; b.vy=-b.vy*FLOOR_R; if(Math.abs(b.vy)<20) b.vy=0; }
-      if(cfg.obstacle) resolveObstacle(b, dt);
+      if(b.isBomb && b.bombType==='shock' && b.fusing){
+        b.fuseTimer -= dt;
+        if(b.fuseTimer<=0){ detonate(b, true); continue; }
+      }
+      if(GDIR==='spin'){
+        b.vx += Math.sin(spinAngle)*GRAVITY*(b.weight||1)*dt;
+        b.vy += Math.cos(spinAngle)*GRAVITY*(b.weight||1)*dt;
+        b.x+=b.vx*dt; b.y+=b.vy*dt; b.vx*=DAMPING; b.vy*=DAMPING;
+        if(b.x-b.rx<0){ b.x=b.rx; b.vx=-b.vx*WALL_R; }
+        if(b.x+b.rx>simW){ b.x=simW-b.rx; b.vx=-b.vx*WALL_R; }
+        if(b.y-b.ry<0){ b.y=b.ry; b.vy=-b.vy*WALL_R; }
+        if(b.y+b.ry>simH){ b.y=simH-b.ry; b.vy=-b.vy*WALL_R; }
+      } else {
+        b.vy+=GRAVITY*(b.weight||1)*dt; b.x+=b.vx*dt; b.y+=b.vy*dt; b.vx*=DAMPING; b.vy*=DAMPING;
+        if(b.x-b.rx<0){ b.x=b.rx; b.vx=-b.vx*WALL_R; }
+        if(b.x+b.rx>simW){ b.x=simW-b.rx; b.vx=-b.vx*WALL_R; }
+        if(b.y+b.ry>simH){ b.y=simH-b.ry; b.vy=-b.vy*FLOOR_R; if(Math.abs(b.vy)<20) b.vy=0; }
+      }
+      if(cfg.obstacleCount) resolveObstacle(b);
     }
     for(let i=0;i<bodies.length;i++){
       const a=bodies[i]; if(a.merging) continue;
       for(let j=i+1;j<bodies.length;j++){
         const b=bodies[j]; if(b.merging) continue;
-        const dx=b.x-a.x, dy=b.y-a.y, dist=Math.hypot(dx,dy)||0.001, minDist=a.r+b.r;
+        const dx=b.x-a.x, dy=b.y-a.y, dist=Math.hypot(dx,dy)||0.001;
+        const angle=Math.atan2(dy,dx);
+        const minDist = effRadius(a,angle)+effRadius(b,angle);
         if(dist<minDist){
           if(a.isBomb || b.isBomb){
-            if(a.spawnT>0.15 && b.spawnT>0.15){
-              explodeBomb(a.isBomb?a:b);
+            const bomb = a.isBomb?a:b, other = a.isBomb?b:a;
+            if(bomb.spawnT>0.15 && other.spawnT>0.15){
+              if(bomb.bombType==='shock'){
+                if(!bomb.fusing){ bomb.fusing=true; bomb.fuseTimer=0.8; beep(500,0.05,'square',0.08); }
+                const overlap=(minDist-dist), nx=dx/dist, ny=dy/dist;
+                bomb.x-=nx*overlap*0.5; bomb.y-=ny*overlap*0.5; other.x+=nx*overlap*0.5; other.y+=ny*overlap*0.5;
+              } else {
+                detonate(bomb, false);
+              }
             }
             continue;
           }
@@ -656,13 +882,16 @@ function mountMerge(area, cfg, cb){
             const nb=makeBody(nx,ny,newIndex);
             nb.vx=(a.vx+b.vx)*0.2; nb.vy=(a.vy+b.vy)*0.2-60; nb.spawnT=0.05;
             spawnParticles(nx,ny,nf.color);
-            score+=nf.score; addFloat(nx,ny-nf.r-10,'+'+nf.score);
+            score+=nf.score; addFloat(nx,ny-nb.ry-10,'+'+nf.score);
             beep(260+newIndex*45,0.14,'sine',0.15);
             bodies.push(nb);
+            if(newIndex>maxTierEver) maxTierEver=newIndex;
             updateHud();
-            if(score>=cfg.target && !ended){ endWin(); }
+            if(cfg.goal==='tier'){ if(newIndex>=cfg.tierTarget && !ended) endWin(); }
+            else if(score>=cfg.target && !ended){ endWin(); }
           } else {
-            const overlap=(minDist-dist)/2, nx=dx/dist, ny=dy/dist, total=a.r+b.r, aR=b.r/total, bR=a.r/total;
+            const ea=effRadius(a,angle), eb=effRadius(b,angle);
+            const overlap=(minDist-dist)/2, nx=dx/dist, ny=dy/dist, total=ea+eb, aR=eb/total, bR=ea/total;
             a.x-=nx*overlap*aR*2; a.y-=ny*overlap*aR*2; b.x+=nx*overlap*bR*2; b.y+=ny*overlap*bR*2;
             const relVx=b.vx-a.vx, relVy=b.vy-a.vy, relDot=relVx*nx+relVy*ny;
             if(relDot<0){
@@ -673,6 +902,7 @@ function mountMerge(area, cfg, cb){
         }
       }
     }
+    separationPass(); separationPass();
     bodies=bodies.filter(b=>!b.merging);
     for(const p of particles){ p.age+=dt; p.x+=p.vx*dt; p.y+=p.vy*dt; p.vy+=400*dt; }
     particles=particles.filter(p=>p.age<p.life);
@@ -680,40 +910,75 @@ function mountMerge(area, cfg, cb){
     floatTexts=floatTexts.filter(t=>t.age<t.life);
     if(shake>0) shake=Math.max(0,shake-dt*30);
 
-    let inDanger=false;
-    for(const b of bodies){ if(b.y-b.r<DANGER_Y && Math.abs(b.vy)<90 && b.spawnT>0.6){ inDanger=true; break; } }
-    if(inDanger){ dangerTimer+=dt; if(dangerTimer>3.2 && !ended) endLose('과일이 너무 높이 쌓였어요!'); }
-    else dangerTimer=Math.max(0,dangerTimer-dt*2);
+    if(GDIR!=='spin'){
+      let inDanger=false;
+      for(const b of bodies){ if(b.y-b.ry<DANGER_Y && Math.abs(b.vy)<90 && b.spawnT>0.6){ inDanger=true; break; } }
+      if(inDanger){ dangerTimer+=dt; if(dangerTimer>3.2 && !ended) endLose('과일이 너무 높이 쌓였어요!'); }
+      else dangerTimer=Math.max(0,dangerTimer-dt*2);
+    }
 
-    if(!ended && dropsLeft<=0 && bodies.every(b=>Math.abs(b.vy)<5) && score<cfg.target){
-      endLose('드롭 횟수를 모두 사용했어요.');
+    const goalMet = cfg.goal==='tier' ? maxTierEver>=cfg.tierTarget : score>=cfg.target;
+    if(!ended && dropsLeft<=0 && !goalMet){
+      if(GDIR==='spin' || cfg.gravitySwitch){
+        exhaustTimer += dt;
+        if(exhaustTimer>1.4) endLose('드롭 횟수를 모두 사용했어요.');
+      } else if(bodies.every(b=>Math.abs(b.vy)<5)){
+        endLose('드롭 횟수를 모두 사용했어요.');
+      }
     }
   }
   function endWin(){
     ended=true;
-    const ratio = score/cfg.target;
-    const stars = ratio>=2 ? 3 : ratio>=1.3 ? 2 : 1;
-    setTimeout(()=>cb.onWin(stars,'최종 점수 '+score+'점'), 400);
+    let stars;
+    if(cfg.goal==='tier'){ stars = dropsLeft>=cfg.drops*0.3 ? 3 : dropsLeft>0 ? 2 : 1; }
+    else { const ratio=score/cfg.target; stars = ratio>=2?3:ratio>=1.3?2:1; }
+    const sub = cfg.goal==='tier' ? (SKIN[cfg.tierTarget].name+' 완성!') : ('최종 점수 '+score+'점');
+    setTimeout(()=>cb.onWin(stars,sub), 400);
   }
   function endLose(msg){ ended=true; setTimeout(()=>cb.onLose(msg), 300); }
 
+  function renderLine(sx1,sy1,sx2,sy2){
+    const [px1,py1]=simToPhys(sx1,sy1), [px2,py2]=simToPhys(sx2,sy2);
+    ctx.moveTo(px1,py1); ctx.lineTo(px2,py2);
+  }
   function render(){
     ctx.clearRect(0,0,W,H);
     ctx.save();
     if(shake>0){ ctx.translate((Math.random()-0.5)*shake, (Math.random()-0.5)*shake); }
-    ctx.save(); ctx.strokeStyle='rgba(255,80,80,0.5)'; ctx.setLineDash([6,6]); ctx.lineWidth=2;
-    ctx.beginPath(); ctx.moveTo(0,DANGER_Y); ctx.lineTo(W,DANGER_Y); ctx.stroke(); ctx.restore();
-    if(cfg.obstacle){
-      const {x1,y1,x2,y2,cx,cy} = obstacleEndpoints();
+    if(GDIR!=='spin'){
+      ctx.save(); ctx.strokeStyle='rgba(255,80,80,0.5)'; ctx.setLineDash([6,6]); ctx.lineWidth=2;
+      ctx.beginPath(); renderLine(0,DANGER_Y,simW,DANGER_Y); ctx.stroke(); ctx.restore();
+    }
+    if(cfg.obstacleCount){
+      for(const bl of obstacleBlades()){
+        const [px1,py1]=simToPhys(bl.x1,bl.y1), [px2,py2]=simToPhys(bl.x2,bl.y2), [pcx,pcy]=simToPhys(bl.cx,bl.cy);
+        ctx.save();
+        ctx.lineCap='round'; ctx.lineWidth=14; ctx.strokeStyle='rgba(120,80,40,0.9)';
+        ctx.beginPath(); ctx.moveTo(px1,py1); ctx.lineTo(px2,py2); ctx.stroke();
+        ctx.lineWidth=6; ctx.strokeStyle='rgba(200,150,90,0.9)';
+        ctx.beginPath(); ctx.moveTo(px1,py1); ctx.lineTo(px2,py2); ctx.stroke();
+        ctx.beginPath(); ctx.arc(pcx,pcy,9,0,Math.PI*2); ctx.fillStyle='#495057'; ctx.fill();
+        ctx.restore();
+      }
+    }
+    for(const m of meteors){
+      for(const t of m.trail){
+        const [tpx,tpy]=simToPhys(t.x,t.y);
+        const a=1-t.age/0.25; ctx.save(); ctx.globalAlpha=Math.max(0,a)*0.5; ctx.fillStyle='#ff922b';
+        ctx.beginPath(); ctx.arc(tpx,tpy,m.r*0.55,0,Math.PI*2); ctx.fill(); ctx.restore();
+      }
+      const [mpx,mpy]=simToPhys(m.x,m.y);
       ctx.save();
-      ctx.lineCap='round'; ctx.lineWidth=14; ctx.strokeStyle='rgba(120,80,40,0.9)';
-      ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
-      ctx.lineWidth=6; ctx.strokeStyle='rgba(200,150,90,0.9)';
-      ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
-      ctx.beginPath(); ctx.arc(cx,cy,9,0,Math.PI*2); ctx.fillStyle='#495057'; ctx.fill();
+      const grad=ctx.createRadialGradient(mpx,mpy,2,mpx,mpy,m.r);
+      grad.addColorStop(0,'#fff3bf'); grad.addColorStop(0.5,'#ff922b'); grad.addColorStop(1,'#e8590c');
+      ctx.beginPath(); ctx.arc(mpx,mpy,m.r,0,Math.PI*2); ctx.fillStyle=grad; ctx.fill();
       ctx.restore();
     }
-    for(const b of bodies) drawFruit(b.x,b.y,b.r*(b.drawScale||1),b.index);
+    for(const b of bodies){
+      const [px,py]=simToPhys(b.x,b.y);
+      const scale=(b.drawScale||1);
+      drawFruit(px,py,b.rx*scale,b.ry*scale,b.index,undefined,b.bombType,b.fusing);
+    }
     for(const p of particles){
       const a=1-p.age/p.life; ctx.save(); ctx.globalAlpha=Math.max(0,a); ctx.fillStyle=p.color;
       ctx.beginPath(); ctx.arc(p.x,p.y,3.5,0,Math.PI*2); ctx.fill(); ctx.restore();
@@ -724,10 +989,11 @@ function mountMerge(area, cfg, cb){
       ctx.fillText(t.text, t.x, t.y - t.age*30); ctx.restore();
     }
     if(!ended){
-      const r=curR();
+      const {rx,ry}=curShape();
       ctx.save(); ctx.globalAlpha=0.9; ctx.setLineDash([4,6]); ctx.strokeStyle='rgba(255,255,255,0.25)';
-      ctx.beginPath(); ctx.moveTo(dropX,r*2+8); ctx.lineTo(dropX,H); ctx.stroke(); ctx.restore();
-      drawFruit(dropX,r+4,r,currentIndex,canDrop?1:0.5);
+      ctx.beginPath(); renderLine(dropX,ry*2+8,dropX,simH); ctx.stroke(); ctx.restore();
+      const [dpx,dpy]=simToPhys(dropX,ry+4);
+      drawFruit(dpx,dpy,rx,ry,currentIndex,canDrop?1:0.5,currentBombType,false);
     }
     ctx.restore();
   }
@@ -738,1304 +1004,42 @@ function mountMerge(area, cfg, cb){
     render();
     raf=requestAnimationFrame(loop);
   }
-  resize(); dropX=W/2; currentIndex=randomDropIndex(); nextIndex=randomDropIndex(); updateHud();
+  resize(); dropX=simW/2;
+  currentIndex=randomDropIndex(); currentBombType = currentIndex===-1?pickBombType():null;
+  nextIndex=randomDropIndex(); nextBombType = nextIndex===-1?pickBombType():null;
+  updateHud();
   raf=requestAnimationFrame(loop);
   const onResize=()=>resize();
   window.addEventListener('resize', onResize);
+
+  let banner=null, bannerTimers=[];
+  function showGravityBanner(dir){
+    const labels={down:'⬇️ 중력이 아래로!',right:'➡️ 중력이 오른쪽으로!',left:'⬅️ 중력이 왼쪽으로!',up:'⬆️ 중력이 위로!',spin:'🌪️ 중력이 빙글빙글 돌아요!'};
+    bannerTimers.forEach(t=>clearTimeout(t));
+    bannerTimers=[];
+    if(!banner){
+      banner=document.createElement('div');
+      banner.style.cssText='position:absolute; top:16px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.75); color:#fff; padding:10px 18px; border-radius:20px; font-weight:800; font-size:15px; z-index:10; pointer-events:none; transition:opacity 0.6s;';
+      area.style.position='relative';
+      area.appendChild(banner);
+    }
+    banner.textContent = labels[dir]||'';
+    banner.style.opacity='1';
+    bannerTimers.push(setTimeout(()=>{ if(banner) banner.style.opacity='0'; }, 1600));
+  }
+  if(cfg.gravityDir) showGravityBanner(cfg.gravityDir);
 
   return {
     destroy(){
       cancelAnimationFrame(raf);
       window.removeEventListener('resize', onResize);
       window.removeEventListener('mouseup', onUp);
+      bannerTimers.forEach(t=>clearTimeout(t));
+      if(banner && banner.parentNode) banner.parentNode.removeChild(banner);
     }
   };
 }
 
-/* =========================================================================
-   GAME 2: MATCH-3
-   ========================================================================= */
-function mountMatch3(area, cfg, cb){
-  const SIZE = cfg.size, COLORS = cfg.colors, MOVES = cfg.moves, TARGET = cfg.target;
-  const PALETTE = ['#ff6b6b','#51cf66','#4dabf7','#ffd43b','#cc5de8','#ff922b'].slice(0,COLORS);
-  let grid = [];
-  let score = 0, movesLeft = MOVES, ended=false, busy=false, selected=null;
-
-  cb.setGoal('목표 점수 '+TARGET+'점 · 이동 '+MOVES+'회 이내');
-  function updateHud(){ cb.setHud('점수 '+score+' / '+TARGET+' · 남은 이동 '+movesLeft); }
-
-  const wrapDiv = document.createElement('div');
-  wrapDiv.style.display='flex'; wrapDiv.style.flexDirection='column'; wrapDiv.style.alignItems='center'; wrapDiv.style.justifyContent='center'; wrapDiv.style.width='100%'; wrapDiv.style.height='100%';
-  const gridEl = document.createElement('div');
-  gridEl.className='pzGrid';
-  const areaRect = area.getBoundingClientRect();
-  const cellSize = Math.floor(Math.min(areaRect.width-20, areaRect.height-20)/SIZE);
-  gridEl.style.gridTemplateColumns = 'repeat('+SIZE+', '+cellSize+'px)';
-  gridEl.style.gridTemplateRows = 'repeat('+SIZE+', '+cellSize+'px)';
-  wrapDiv.appendChild(gridEl);
-  area.appendChild(wrapDiv);
-
-  function randColor(){ return Math.floor(Math.random()*COLORS); }
-  function initGrid(){
-    grid = [];
-    for(let r=0;r<SIZE;r++){
-      grid.push([]);
-      for(let c=0;c<SIZE;c++){
-        let col;
-        do{ col = randColor(); }
-        while(
-          (c>=2 && grid[r][c-1]===col && grid[r][c-2]===col) ||
-          (r>=2 && grid[r-1][c]===col && grid[r-2][c]===col)
-        );
-        grid[r].push(col);
-      }
-    }
-  }
-  const cellEls = [];
-  function buildDom(){
-    gridEl.innerHTML=''; cellEls.length=0;
-    for(let r=0;r<SIZE;r++){
-      const row=[];
-      for(let c=0;c<SIZE;c++){
-        const cell=document.createElement('div');
-        cell.className='pzCell';
-        cell.style.width=cellSize+'px'; cell.style.height=cellSize+'px'; cell.style.borderRadius='50%';
-        cell.addEventListener('pointerdown', ()=>onCellClick(r,c));
-        gridEl.appendChild(cell);
-        row.push(cell);
-      }
-      cellEls.push(row);
-    }
-  }
-  function render(){
-    for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++){
-      const cell = cellEls[r][c];
-      const col = grid[r][c];
-      cell.style.background = col===null ? 'transparent' : PALETTE[col];
-      cell.style.boxShadow = col===null ? 'none' : 'inset -4px -4px 8px rgba(0,0,0,0.25), inset 4px 4px 8px rgba(255,255,255,0.25)';
-      cell.classList.toggle('sel', !!(selected && selected[0]===r && selected[1]===c));
-    }
-  }
-  function findMatches(){
-    const marks = Array.from({length:SIZE},()=>Array(SIZE).fill(false));
-    for(let r=0;r<SIZE;r++){
-      let run=1;
-      for(let c=1;c<=SIZE;c++){
-        if(c<SIZE && grid[r][c]!==null && grid[r][c]===grid[r][c-1]) run++;
-        else { if(run>=3) for(let k=0;k<run;k++) marks[r][c-1-k]=true; run=1; }
-      }
-    }
-    for(let c=0;c<SIZE;c++){
-      let run=1;
-      for(let r=1;r<=SIZE;r++){
-        if(r<SIZE && grid[r][c]!==null && grid[r][c]===grid[r-1][c]) run++;
-        else { if(run>=3) for(let k=0;k<run;k++) marks[r-1-k][c]=true; run=1; }
-      }
-    }
-    return marks;
-  }
-  function anyMatchExists(m){ for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++) if(m[r][c]) return true; return false; }
-  function resolveCascades(){
-    let cascade=0;
-    function step(){
-      const marks = findMatches();
-      if(!anyMatchExists(marks)){
-        busy=false;
-        render();
-        updateHud();
-        checkEnd();
-        return;
-      }
-      cascade++;
-      let cleared=0;
-      for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++) if(marks[r][c]){ grid[r][c]=null; cleared++; }
-      score += cleared*10*cascade;
-      sfxGood();
-      render();
-      setTimeout(()=>{
-        for(let c=0;c<SIZE;c++){
-          let write=SIZE-1;
-          for(let r=SIZE-1;r>=0;r--){ if(grid[r][c]!==null){ grid[write][c]=grid[r][c]; if(write!==r) grid[r][c]=null; write--; } }
-          for(let r=write;r>=0;r--) grid[r][c]=randColor();
-        }
-        render();
-        setTimeout(step, 180);
-      }, 160);
-    }
-    step();
-  }
-  function checkEnd(){
-    if(ended) return;
-    if(score>=TARGET){
-      ended=true;
-      const ratio = score/TARGET;
-      const stars = movesLeft>=MOVES*0.4 ? 3 : ratio>=1.1 ? 2 : (movesLeft>0?2:1);
-      setTimeout(()=>cb.onWin(stars,'최종 점수 '+score+'점 · 이동 '+(MOVES-movesLeft)+'회 사용'), 300);
-    } else if(movesLeft<=0){
-      ended=true;
-      setTimeout(()=>cb.onLose('이동 횟수를 모두 사용했어요.'), 200);
-    }
-  }
-  function swap(r1,c1,r2,c2){ const t=grid[r1][c1]; grid[r1][c1]=grid[r2][c2]; grid[r2][c2]=t; }
-  function onCellClick(r,c){
-    if(busy||ended) return;
-    ensureAudio();
-    if(!selected){ selected=[r,c]; render(); return; }
-    const [sr,sc]=selected;
-    const adjacent = (Math.abs(sr-r)+Math.abs(sc-c))===1;
-    if(sr===r && sc===c){ selected=null; render(); return; }
-    if(!adjacent){ selected=[r,c]; render(); return; }
-    selected=null;
-    swap(sr,sc,r,c);
-    const marks = findMatches();
-    if(!anyMatchExists(marks)){
-      swap(sr,sc,r,c);
-      sfxBad();
-      render();
-      return;
-    }
-    sfxClick();
-    movesLeft--;
-    busy=true;
-    render();
-    resolveCascades();
-  }
-  initGrid(); buildDom(); render(); updateHud();
-  return { destroy(){} };
-}
-
-/* =========================================================================
-   GAME 3: 2048
-   ========================================================================= */
-function mount2048(area, cfg, cb){
-  const SIZE=4, TARGET=cfg.target;
-  let grid, score=0, ended=false, moveCount=0;
-  cb.setGoal('타일 '+TARGET+'를 만들면 승리!');
-  function updateHud(){ cb.setHud('점수 '+score+' · 목표 '+TARGET); }
-
-  const wrapDiv=document.createElement('div');
-  wrapDiv.style.cssText='display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%;';
-  const gridEl=document.createElement('div');
-  gridEl.className='pzGrid';
-  const rect=area.getBoundingClientRect();
-  const cellSize=Math.floor(Math.min(rect.width-30, rect.height-30)/SIZE);
-  gridEl.style.gridTemplateColumns='repeat('+SIZE+','+cellSize+'px)';
-  gridEl.style.gridTemplateRows='repeat('+SIZE+','+cellSize+'px)';
-  gridEl.style.background='rgba(0,0,0,0.2)'; gridEl.style.padding='6px'; gridEl.style.borderRadius='14px';
-  wrapDiv.appendChild(gridEl);
-  area.appendChild(wrapDiv);
-
-  const cellEls=[];
-  function buildDom(){
-    gridEl.innerHTML=''; cellEls.length=0;
-    for(let r=0;r<SIZE;r++){ const row=[];
-      for(let c=0;c<SIZE;c++){
-        const cell=document.createElement('div'); cell.className='pzCell';
-        cell.style.width=cellSize+'px'; cell.style.height=cellSize+'px'; cell.style.fontSize=(cellSize*0.36)+'px';
-        gridEl.appendChild(cell); row.push(cell);
-      }
-      cellEls.push(row);
-    }
-  }
-  const NUM_COLORS = {2:'#eee4da',4:'#ede0c8',8:'#f2b179',16:'#f59563',32:'#f67c5f',64:'#f65e3b',128:'#edcf72',256:'#edcc61',512:'#edc850',1024:'#edc53f',2048:'#edc22e',4096:'#3c3a32'};
-  function render(){
-    for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++){
-      const v=grid[r][c]; const cell=cellEls[r][c];
-      cell.textContent = v? v : '';
-      cell.style.background = v ? (NUM_COLORS[v]||'#3c3a32') : 'rgba(255,255,255,0.06)';
-      cell.style.color = v && v<=4 ? '#5a4632' : '#fff';
-      cell.style.borderRadius='8px';
-    }
-  }
-  function emptyCells(){ const arr=[]; for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++) if(!grid[r][c]) arr.push([r,c]); return arr; }
-  function addRandomTile(){
-    const empties=emptyCells(); if(!empties.length) return;
-    const [r,c]=empties[Math.floor(Math.random()*empties.length)];
-    grid[r][c]= Math.random()<0.9 ? 2 : 4;
-  }
-  function initGrid(){ grid=Array.from({length:SIZE},()=>Array(SIZE).fill(0)); addRandomTile(); addRandomTile(); }
-
-  function slideRowLeft(row){
-    const vals = row.filter(v=>v!==0);
-    let gained=0;
-    for(let i=0;i<vals.length-1;i++){
-      if(vals[i]===vals[i+1]){ vals[i]*=2; gained+=vals[i]; vals.splice(i+1,1); }
-    }
-    while(vals.length<SIZE) vals.push(0);
-    return {row:vals, gained};
-  }
-  function rotateGridCW(g){
-    const n=g.length; const res=Array.from({length:n},()=>Array(n).fill(0));
-    for(let r=0;r<n;r++)for(let c=0;c<n;c++) res[c][n-1-r]=g[r][c];
-    return res;
-  }
-  function move(dir){
-    if(ended) return;
-    let g = grid.map(r=>r.slice());
-    let rotations = {left:0, up:3, right:2, down:1}[dir];
-    for(let i=0;i<rotations;i++) g=rotateGridCW(g);
-    let moved=false, gained=0;
-    for(let r=0;r<SIZE;r++){
-      const before=g[r].slice();
-      const {row,gained:gn}=slideRowLeft(g[r]);
-      g[r]=row; gained+=gn;
-      if(row.some((v,i)=>v!==before[i])) moved=true;
-    }
-    for(let i=0;i<(4-rotations)%4;i++) g=rotateGridCW(g);
-    if(!moved) return;
-    grid=g; score+=gained; moveCount++;
-    if(gained>0) sfxGood(); else sfxClick();
-    addRandomTile();
-    render();
-    updateHud();
-    checkEnd();
-  }
-  function boardHasMoves(){
-    for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++){
-      if(!grid[r][c]) return true;
-      if(c<SIZE-1 && grid[r][c]===grid[r][c+1]) return true;
-      if(r<SIZE-1 && grid[r][c]===grid[r+1][c]) return true;
-    }
-    return false;
-  }
-  function checkEnd(){
-    for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++){
-      if(grid[r][c]>=TARGET && !ended){
-        ended=true;
-        const empties=emptyCells().length;
-        const stars = empties>=6?3:empties>=3?2:1;
-        setTimeout(()=>cb.onWin(stars,'최종 점수 '+score+' · '+moveCount+'수 만에 달성'), 300);
-        return;
-      }
-    }
-    if(!boardHasMoves() && !ended){
-      ended=true;
-      setTimeout(()=>cb.onLose('더 이상 움직일 수 없어요.'), 200);
-    }
-  }
-  function onKey(e){
-    const map={ArrowLeft:'left',ArrowRight:'right',ArrowUp:'up',ArrowDown:'down'};
-    if(map[e.key]){ e.preventDefault(); move(map[e.key]); }
-  }
-  window.addEventListener('keydown', onKey);
-  let touchStart=null;
-  function onTouchStart(e){ touchStart=[e.touches[0].clientX, e.touches[0].clientY]; }
-  function onTouchEnd(e){
-    if(!touchStart) return;
-    const dx=e.changedTouches[0].clientX-touchStart[0], dy=e.changedTouches[0].clientY-touchStart[1];
-    if(Math.hypot(dx,dy)<24) return;
-    if(Math.abs(dx)>Math.abs(dy)) move(dx>0?'right':'left');
-    else move(dy>0?'down':'up');
-    touchStart=null;
-  }
-  wrapDiv.addEventListener('touchstart', onTouchStart, {passive:true});
-  wrapDiv.addEventListener('touchend', onTouchEnd, {passive:true});
-
-  buildDom(); initGrid(); render(); updateHud();
-  return {
-    destroy(){ window.removeEventListener('keydown', onKey); }
-  };
-}
-
-/* =========================================================================
-   GAME 4: SLIDING PUZZLE
-   ========================================================================= */
-function mountSlide(area, cfg, cb){
-  const SIZE=cfg.size, N=SIZE*SIZE;
-  let tiles, blankIdx, moves=0, ended=false;
-  cb.setGoal('숫자를 순서대로 정렬하세요 (1~'+(N-1)+')');
-  function updateHud(){ cb.setHud('이동 '+moves+'회'); }
-
-  const wrapDiv=document.createElement('div');
-  wrapDiv.style.cssText='display:flex;align-items:center;justify-content:center;width:100%;height:100%;';
-  const gridEl=document.createElement('div'); gridEl.className='pzGrid';
-  const rect=area.getBoundingClientRect();
-  const cellSize=Math.floor(Math.min(rect.width-24, rect.height-24)/SIZE);
-  gridEl.style.gridTemplateColumns='repeat('+SIZE+','+cellSize+'px)';
-  gridEl.style.gridTemplateRows='repeat('+SIZE+','+cellSize+'px)';
-  wrapDiv.appendChild(gridEl);
-  area.appendChild(wrapDiv);
-
-  function solvedArr(){ const a=[]; for(let i=1;i<N;i++) a.push(i); a.push(0); return a; }
-  function idxToRC(i){ return [Math.floor(i/SIZE), i%SIZE]; }
-  function shuffle(){
-    tiles = solvedArr();
-    blankIdx = N-1;
-    let lastMove=-1;
-    for(let i=0;i<cfg.shuffles;i++){
-      const [br,bc]=idxToRC(blankIdx);
-      const options=[];
-      if(br>0) options.push(blankIdx-SIZE);
-      if(br<SIZE-1) options.push(blankIdx+SIZE);
-      if(bc>0) options.push(blankIdx-1);
-      if(bc<SIZE-1) options.push(blankIdx+1);
-      const filtered = options.filter(o=>o!==lastMove);
-      const pick = filtered[Math.floor(Math.random()*filtered.length)];
-      tiles[blankIdx]=tiles[pick]; tiles[pick]=0;
-      lastMove=blankIdx; blankIdx=pick;
-    }
-  }
-  const cellEls=[];
-  function buildDom(){
-    gridEl.innerHTML=''; cellEls.length=0;
-    for(let i=0;i<N;i++){
-      const cell=document.createElement('div'); cell.className='pzCell';
-      cell.style.width=cellSize+'px'; cell.style.height=cellSize+'px'; cell.style.fontSize=(cellSize*0.34)+'px';
-      cell.style.borderRadius='10px';
-      cell.addEventListener('pointerdown', ()=>onTileClick(i));
-      gridEl.appendChild(cell);
-      cellEls.push(cell);
-    }
-  }
-  function render(){
-    for(let i=0;i<N;i++){
-      const v=tiles[i]; const cell=cellEls[i];
-      cell.textContent = v===0 ? '' : v;
-      cell.style.background = v===0 ? 'transparent' : 'linear-gradient(135deg,#4dabf7,#3b82f6)';
-      cell.style.boxShadow = v===0 ? 'none' : '0 4px 10px rgba(0,0,0,0.3)';
-      cell.style.cursor = v===0 ? 'default':'pointer';
-    }
-  }
-  function onTileClick(i){
-    if(ended) return;
-    const [r,c]=idxToRC(i), [br,bc]=idxToRC(blankIdx);
-    if(Math.abs(r-br)+Math.abs(c-bc)!==1) return;
-    ensureAudio();
-    tiles[blankIdx]=tiles[i]; tiles[i]=0; blankIdx=i;
-    moves++; sfxClick(); render(); updateHud();
-    if(checkSolved()){
-      ended=true;
-      const par=cfg.shuffles;
-      const stars = moves<=par*0.7?3: moves<=par*1.1?2:1;
-      setTimeout(()=>cb.onWin(stars, moves+'회 만에 완성!'), 300);
-    }
-  }
-  function checkSolved(){
-    const target=solvedArr();
-    for(let i=0;i<N;i++) if(tiles[i]!==target[i]) return false;
-    return true;
-  }
-  shuffle(); buildDom(); render(); updateHud();
-  return { destroy(){} };
-}
-
-/* =========================================================================
-   GAME 5: FLOW CONNECT
-   ========================================================================= */
-function mountFlow(area, cfg, cb){
-  const SIZE = cfg.size;
-  const dotsConfig = cfg.dots; // [ [color,[[r,c],[r,c]]], ... ]
-  let cellOwner, paths, dotMap, drawingColor=null, currentPath=[], attempts=0, ended=false;
-  cb.setGoal('같은 색 점을 이어서 모든 경로를 완성하세요');
-  function updateHud(){
-    const done = dotsConfig.filter(d=>paths[d[0]] && isComplete(d[0])).length;
-    cb.setHud('연결 '+done+' / '+dotsConfig.length);
-  }
-
-  const wrapDiv=document.createElement('div');
-  wrapDiv.style.cssText='display:flex;align-items:center;justify-content:center;width:100%;height:100%;';
-  const gridEl=document.createElement('div'); gridEl.className='pzGrid'; gridEl.style.gap='2px';
-  const rect=area.getBoundingClientRect();
-  const cellSize=Math.floor(Math.min(rect.width-24, rect.height-24)/SIZE);
-  gridEl.style.gridTemplateColumns='repeat('+SIZE+','+cellSize+'px)';
-  gridEl.style.gridTemplateRows='repeat('+SIZE+','+cellSize+'px)';
-  gridEl.style.background='rgba(0,0,0,0.25)'; gridEl.style.padding='4px'; gridEl.style.borderRadius='12px';
-  wrapDiv.appendChild(gridEl);
-  area.appendChild(wrapDiv);
-
-  function key(r,c){ return r+'_'+c; }
-  function initState(){
-    cellOwner = {}; // key -> color
-    paths = {}; // color -> [ [r,c], ... ]
-    dotMap = {}; // key -> color (endpoints)
-    dotsConfig.forEach(([color, pair])=>{
-      paths[color]=[];
-      pair.forEach(([r,c])=>{ dotMap[key(r,c)]=color; });
-    });
-  }
-  const cellEls = [];
-  function buildDom(){
-    gridEl.innerHTML=''; cellEls.length=0;
-    for(let r=0;r<SIZE;r++){ const row=[];
-      for(let c=0;c<SIZE;c++){
-        const cell=document.createElement('div');
-        cell.style.cssText='position:relative;width:'+cellSize+'px;height:'+cellSize+'px;background:rgba(255,255,255,0.05);border-radius:6px;';
-        cell.dataset.r=r; cell.dataset.c=c;
-        gridEl.appendChild(cell);
-        row.push(cell);
-      }
-      cellEls.push(row);
-    }
-  }
-  function isComplete(color){
-    const pair = dotsConfig.find(d=>d[0]===color)[1];
-    const p = paths[color];
-    if(p.length<2) return false;
-    const a=p[0], b=p[p.length-1];
-    const match = (pt,dp)=>pt[0]===dp[0]&&pt[1]===dp[1];
-    return (match(a,pair[0])&&match(b,pair[1])) || (match(a,pair[1])&&match(b,pair[0]));
-  }
-  function clearPathOwnership(color){
-    paths[color].forEach(([r,c])=>{ if(cellOwner[key(r,c)]===color) delete cellOwner[key(r,c)]; });
-    paths[color]=[];
-  }
-  function render(){
-    for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++){
-      const cell=cellEls[r][c];
-      cell.innerHTML='';
-      const dotColor = dotMap[key(r,c)];
-      const owner = cellOwner[key(r,c)];
-      if(owner){
-        const bar=document.createElement('div');
-        bar.style.cssText='position:absolute; inset:14%; border-radius:5px; background:'+owner+';';
-        cell.appendChild(bar);
-      }
-      if(dotColor){
-        const dot=document.createElement('div');
-        dot.style.cssText='position:absolute; inset:20%; border-radius:50%; background:'+dotColor+'; box-shadow:0 0 6px '+dotColor+';';
-        cell.appendChild(dot);
-      }
-    }
-    // draw connecting lines between consecutive path cells using box-shadow bridge technique
-    Object.keys(paths).forEach(color=>{
-      const p = paths[color];
-      for(let i=0;i<p.length-1;i++){
-        const [r1,c1]=p[i], [r2,c2]=p[i+1];
-        const dr=r2-r1, dc=c2-c1;
-        const bridge=document.createElement('div');
-        const thickness = Math.max(4, cellSize*0.28);
-        if(dr===0){
-          bridge.style.cssText='position:absolute; top:calc(50% - '+(thickness/2)+'px); height:'+thickness+'px; background:'+color+'; '+
-            (dc>0 ? 'left:50%; width:50%;' : 'right:50%; width:50%;');
-        } else {
-          bridge.style.cssText='position:absolute; left:calc(50% - '+(thickness/2)+'px); width:'+thickness+'px; background:'+color+'; '+
-            (dr>0 ? 'top:50%; height:50%;' : 'bottom:50%; height:50%;');
-        }
-        cellEls[r1][c1].appendChild(bridge);
-      }
-    });
-    updateHud();
-  }
-  function cellFromPoint(x,y){
-    const el = document.elementFromPoint(x,y);
-    if(!el) return null;
-    let node = el;
-    while(node && node.dataset && node.dataset.r===undefined) node = node.parentElement;
-    if(!node || !node.dataset || node.dataset.r===undefined) return null;
-    return [parseInt(node.dataset.r,10), parseInt(node.dataset.c,10)];
-  }
-  function startDrag(r,c){
-    const color = dotMap[key(r,c)] || cellOwner[key(r,c)];
-    if(!color) return;
-    ensureAudio();
-    attempts++;
-    clearPathOwnership(color);
-    drawingColor = color;
-    currentPath = [[r,c]];
-    cellOwner[key(r,c)] = color;
-    paths[color] = currentPath;
-    render();
-  }
-  function extendDrag(r,c){
-    if(!drawingColor) return;
-    const last = currentPath[currentPath.length-1];
-    if(last[0]===r && last[1]===c) return;
-    // backtrack
-    if(currentPath.length>1){
-      const prev = currentPath[currentPath.length-2];
-      if(prev[0]===r && prev[1]===c){
-        delete cellOwner[key(last[0],last[1])];
-        currentPath.pop();
-        paths[drawingColor]=currentPath;
-        render();
-        return;
-      }
-    }
-    const dist = Math.abs(last[0]-r)+Math.abs(last[1]-c);
-    if(dist!==1) return;
-    const owner = cellOwner[key(r,c)];
-    const dot = dotMap[key(r,c)];
-    if(owner && owner!==drawingColor) return; // blocked by other color
-    if(dot && dot!==drawingColor) return; // other color's dot
-    if(owner===drawingColor && !(dot===drawingColor)) return; // already own path (not a dot) - avoid loops
-    currentPath.push([r,c]);
-    cellOwner[key(r,c)] = drawingColor;
-    paths[drawingColor] = currentPath;
-    render();
-    if(dot===drawingColor && currentPath.length>1){
-      sfxGood();
-      finishDrag();
-      checkWin();
-    }
-  }
-  function finishDrag(){ drawingColor=null; currentPath=[]; }
-  function onPointerDown(e){
-    const pos = cellFromPoint(e.clientX, e.clientY);
-    if(pos) startDrag(pos[0], pos[1]);
-    e.preventDefault();
-  }
-  function onPointerMove(e){
-    if(!drawingColor) return;
-    const pos = cellFromPoint(e.clientX, e.clientY);
-    if(pos) extendDrag(pos[0], pos[1]);
-    e.preventDefault();
-  }
-  function onPointerUp(e){ finishDrag(); }
-  gridEl.addEventListener('pointerdown', onPointerDown);
-  gridEl.addEventListener('pointermove', onPointerMove);
-  window.addEventListener('pointerup', onPointerUp);
-  gridEl.style.touchAction='none';
-
-  function checkWin(){
-    const allDone = dotsConfig.every(d=>isComplete(d[0]));
-    if(allDone && !ended){
-      ended=true;
-      const totalCells = SIZE*SIZE;
-      const filled = Object.keys(cellOwner).length;
-      const stars = attempts<=dotsConfig.length+1 ? 3 : attempts<=dotsConfig.length+3 ? 2 : 1;
-      setTimeout(()=>cb.onWin(stars, filled+' / '+totalCells+'칸 채움'), 300);
-    }
-  }
-  initState(); buildDom(); render();
-  return {
-    destroy(){ window.removeEventListener('pointerup', onPointerUp); }
-  };
-}
-
-/* =========================================================================
-   GAME 6: LIGHTS OUT
-   ========================================================================= */
-function mountLights(area, cfg, cb){
-  const SIZE = cfg.size;
-  let grid, clicks=0, ended=false;
-  cb.setGoal('모든 불을 꺼서 클리어하세요');
-  function updateHud(){ cb.setHud('클릭 '+clicks+'회'); }
-
-  const wrapDiv=document.createElement('div');
-  wrapDiv.style.cssText='display:flex;align-items:center;justify-content:center;width:100%;height:100%;';
-  const gridEl=document.createElement('div'); gridEl.className='pzGrid';
-  const rect=area.getBoundingClientRect();
-  const cellSize=Math.floor(Math.min(rect.width-24, rect.height-24)/SIZE);
-  gridEl.style.gridTemplateColumns='repeat('+SIZE+','+cellSize+'px)';
-  gridEl.style.gridTemplateRows='repeat('+SIZE+','+cellSize+'px)';
-  wrapDiv.appendChild(gridEl);
-  area.appendChild(wrapDiv);
-
-  function toggle(g,r,c){
-    [[0,0],[1,0],[-1,0],[0,1],[0,-1]].forEach(([dr,dc])=>{
-      const nr=r+dr, nc=c+dc;
-      if(nr>=0&&nr<SIZE&&nc>=0&&nc<SIZE) g[nr][nc]=!g[nr][nc];
-    });
-  }
-  function generate(){
-    grid = Array.from({length:SIZE},()=>Array(SIZE).fill(false));
-    let lastR=-1,lastC=-1;
-    for(let i=0;i<cfg.scramble;i++){
-      let r,c;
-      do{ r=Math.floor(Math.random()*SIZE); c=Math.floor(Math.random()*SIZE); } while(r===lastR&&c===lastC);
-      toggle(grid,r,c); lastR=r; lastC=c;
-    }
-    if(grid.every(row=>row.every(v=>!v))) toggle(grid,0,0);
-  }
-  const cellEls=[];
-  function buildDom(){
-    gridEl.innerHTML=''; cellEls.length=0;
-    for(let r=0;r<SIZE;r++){ const row=[];
-      for(let c=0;c<SIZE;c++){
-        const cell=document.createElement('div'); cell.className='pzCell';
-        cell.style.width=cellSize+'px'; cell.style.height=cellSize+'px'; cell.style.borderRadius='8px';
-        cell.addEventListener('pointerdown', ()=>onClick(r,c));
-        gridEl.appendChild(cell); row.push(cell);
-      }
-      cellEls.push(row);
-    }
-  }
-  function render(){
-    for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++){
-      const on = grid[r][c];
-      const cell=cellEls[r][c];
-      cell.style.background = on ? 'radial-gradient(circle,#ffe066,#f59f00)' : 'rgba(255,255,255,0.06)';
-      cell.style.boxShadow = on ? '0 0 16px rgba(255,224,102,0.7)' : 'none';
-    }
-  }
-  function onClick(r,c){
-    if(ended) return;
-    ensureAudio();
-    toggle(grid,r,c); clicks++; sfxClick(); render(); updateHud();
-    if(grid.every(row=>row.every(v=>!v))){
-      ended=true;
-      const par=cfg.scramble;
-      const stars = clicks<=par?3: clicks<=par*1.6?2:1;
-      setTimeout(()=>cb.onWin(stars, clicks+'회 클릭으로 완료!'), 300);
-    }
-  }
-  generate(); buildDom(); render(); updateHud();
-  return { destroy(){} };
-}
-
-/* =========================================================================
-   GAME 7: MEMORY MATCH
-   ========================================================================= */
-function mountMemory(area, cfg, cb){
-  const PAIRS = cfg.pairs;
-  const ICONS = ['🍎','🍊','🍋','🍇','🍓','🍒','🍑','🥝','🍍','🥥','🍉','🍌','🥑','🌽','🍅','🥕'];
-  const chosen = ICONS.slice(0, PAIRS);
-  let deck = chosen.concat(chosen);
-  for(let i=deck.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [deck[i],deck[j]]=[deck[j],deck[i]]; }
-  let flipped=[], matched=new Set(), attempts=0, busy=false, ended=false;
-  cb.setGoal(PAIRS+'쌍을 모두 맞춰보세요');
-  function updateHud(){ cb.setHud('시도 '+attempts+'회 · '+(matched.size/2)+' / '+PAIRS); }
-
-  const cols = PAIRS<=8?4: PAIRS<=10?5:6;
-  const rows = Math.ceil(deck.length/cols);
-  const wrapDiv=document.createElement('div');
-  wrapDiv.style.cssText='display:flex;align-items:center;justify-content:center;width:100%;height:100%;';
-  const gridEl=document.createElement('div'); gridEl.className='pzGrid';
-  const rect=area.getBoundingClientRect();
-  const cellSize=Math.floor(Math.min((rect.width-24)/cols, (rect.height-24)/rows));
-  gridEl.style.gridTemplateColumns='repeat('+cols+','+cellSize+'px)';
-  gridEl.style.gridTemplateRows='repeat('+rows+','+cellSize+'px)';
-  wrapDiv.appendChild(gridEl);
-  area.appendChild(wrapDiv);
-
-  const cellEls=[];
-  function buildDom(){
-    gridEl.innerHTML=''; cellEls.length=0;
-    for(let i=0;i<deck.length;i++){
-      const cell=document.createElement('div'); cell.className='pzCell';
-      cell.style.width=cellSize+'px'; cell.style.height=cellSize+'px'; cell.style.fontSize=(cellSize*0.5)+'px'; cell.style.borderRadius='10px';
-      cell.addEventListener('pointerdown', ()=>onCard(i));
-      gridEl.appendChild(cell); cellEls.push(cell);
-    }
-  }
-  function render(){
-    for(let i=0;i<deck.length;i++){
-      const cell=cellEls[i];
-      const open = flipped.includes(i) || matched.has(i);
-      cell.textContent = open ? deck[i] : '';
-      cell.style.background = matched.has(i) ? 'rgba(81,207,102,0.28)' : open ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.06)';
-    }
-  }
-  function onCard(i){
-    if(busy||ended) return;
-    if(flipped.includes(i) || matched.has(i)) return;
-    ensureAudio(); sfxClick();
-    flipped.push(i); render();
-    if(flipped.length===2){
-      attempts++; updateHud(); busy=true;
-      const [a,b]=flipped;
-      if(deck[a]===deck[b]){
-        matched.add(a); matched.add(b);
-        sfxGood();
-        setTimeout(()=>{ flipped=[]; busy=false; render(); updateHud(); checkEnd(); }, 260);
-      } else {
-        setTimeout(()=>{ flipped=[]; busy=false; render(); }, 700);
-      }
-    }
-  }
-  function checkEnd(){
-    if(matched.size===deck.length && !ended){
-      ended=true;
-      const stars = attempts<=PAIRS*1.5?3: attempts<=PAIRS*2.2?2:1;
-      setTimeout(()=>cb.onWin(stars, attempts+'번 시도로 완료!'), 300);
-    }
-  }
-  buildDom(); render(); updateHud();
-  return { destroy(){} };
-}
-
-/* =========================================================================
-   GAME 8: MAZE
-   ========================================================================= */
-function genMaze(n){
-  const cells=Array.from({length:n},()=>Array.from({length:n},()=>({N:true,S:true,E:true,W:true,visited:false})));
-  const stack=[[0,0]];
-  cells[0][0].visited=true;
-  while(stack.length){
-    const [r,c]=stack[stack.length-1];
-    const dirs=[];
-    if(r>0 && !cells[r-1][c].visited) dirs.push('N');
-    if(r<n-1 && !cells[r+1][c].visited) dirs.push('S');
-    if(c>0 && !cells[r][c-1].visited) dirs.push('W');
-    if(c<n-1 && !cells[r][c+1].visited) dirs.push('E');
-    if(!dirs.length){ stack.pop(); continue; }
-    const dir=dirs[Math.floor(Math.random()*dirs.length)];
-    let nr=r,nc=c;
-    if(dir==='N'){ nr=r-1; cells[r][c].N=false; cells[nr][nc].S=false; }
-    if(dir==='S'){ nr=r+1; cells[r][c].S=false; cells[nr][nc].N=false; }
-    if(dir==='W'){ nc=c-1; cells[r][c].W=false; cells[nr][nc].E=false; }
-    if(dir==='E'){ nc=c+1; cells[r][c].E=false; cells[nr][nc].W=false; }
-    cells[nr][nc].visited=true;
-    stack.push([nr,nc]);
-  }
-  return cells;
-}
-function bfsShortest(cells, n, start, goal){
-  const visited=Array.from({length:n},()=>Array(n).fill(false));
-  let queue=[[start[0],start[1],0]];
-  visited[start[0]][start[1]]=true;
-  while(queue.length){
-    const [r,c,d]=queue.shift();
-    if(r===goal[0]&&c===goal[1]) return d;
-    const cell=cells[r][c];
-    const moves=[];
-    if(!cell.N) moves.push([r-1,c]);
-    if(!cell.S) moves.push([r+1,c]);
-    if(!cell.E) moves.push([r,c+1]);
-    if(!cell.W) moves.push([r,c-1]);
-    for(const [nr,nc] of moves){ if(!visited[nr][nc]){ visited[nr][nc]=true; queue.push([nr,nc,d+1]); } }
-  }
-  return 0;
-}
-function mountMaze(area, cfg, cb){
-  const N = cfg.size;
-  const cells = genMaze(N);
-  let player=[0,0];
-  const goal=[N-1,N-1];
-  let moves=0, ended=false;
-  const optimal = bfsShortest(cells, N, player, goal) || 1;
-  cb.setGoal('출구(⭐)까지 이동하세요 · 방향키/스와이프/클릭');
-  function updateHud(){ cb.setHud('이동 '+moves+'회'); }
-
-  const canvas=document.createElement('canvas');
-  area.appendChild(canvas);
-  const ctx=canvas.getContext('2d');
-  let W=0,H=0,DPR=1,cellPx=0,offX=0,offY=0;
-  function resize(){
-    const rect=area.getBoundingClientRect();
-    DPR=Math.min(window.devicePixelRatio||1,2);
-    W=rect.width; H=rect.height;
-    canvas.style.width=W+'px'; canvas.style.height=H+'px';
-    canvas.width=Math.floor(W*DPR); canvas.height=Math.floor(H*DPR);
-    ctx.setTransform(DPR,0,0,DPR,0,0);
-    cellPx = (Math.min(W,H)-20)/N;
-    offX=(W-cellPx*N)/2; offY=(H-cellPx*N)/2;
-    render();
-  }
-  function render(){
-    ctx.clearRect(0,0,W,H);
-    ctx.save();
-    ctx.translate(offX,offY);
-    ctx.strokeStyle='rgba(255,255,255,0.75)'; ctx.lineWidth=Math.max(2,cellPx*0.06); ctx.lineCap='round';
-    for(let r=0;r<N;r++)for(let c=0;c<N;c++){
-      const cell=cells[r][c]; const x=c*cellPx, y=r*cellPx;
-      ctx.beginPath();
-      if(cell.N){ ctx.moveTo(x,y); ctx.lineTo(x+cellPx,y); }
-      if(cell.W){ ctx.moveTo(x,y); ctx.lineTo(x,y+cellPx); }
-      if(r===N-1 && cell.S){ ctx.moveTo(x,y+cellPx); ctx.lineTo(x+cellPx,y+cellPx); }
-      if(c===N-1 && cell.E){ ctx.moveTo(x+cellPx,y); ctx.lineTo(x+cellPx,y+cellPx); }
-      ctx.stroke();
-    }
-    ctx.font=(cellPx*0.55)+'px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillText('⭐', goal[1]*cellPx+cellPx/2, goal[0]*cellPx+cellPx/2);
-    const px=player[1]*cellPx+cellPx/2, py=player[0]*cellPx+cellPx/2;
-    const grad=ctx.createRadialGradient(px-4,py-4,2,px,py,cellPx*0.28);
-    grad.addColorStop(0,'#a5d8ff'); grad.addColorStop(1,'#4dabf7');
-    ctx.beginPath(); ctx.arc(px,py,cellPx*0.28,0,Math.PI*2); ctx.fillStyle=grad; ctx.fill();
-    ctx.restore();
-  }
-  function canMove(r,c,dir){
-    const cell=cells[r][c];
-    if(dir==='N') return !cell.N;
-    if(dir==='S') return !cell.S;
-    if(dir==='E') return !cell.E;
-    if(dir==='W') return !cell.W;
-  }
-  function tryMove(dir){
-    if(ended) return;
-    const [r,c]=player;
-    if(!canMove(r,c,dir)) return;
-    let nr=r,nc=c;
-    if(dir==='N') nr--; if(dir==='S') nr++; if(dir==='E') nc++; if(dir==='W') nc--;
-    player=[nr,nc]; moves++; sfxClick(); updateHud(); render();
-    if(nr===goal[0] && nc===goal[1] && !ended){
-      ended=true;
-      const stars = moves<=optimal*1.3?3: moves<=optimal*1.8?2:1;
-      setTimeout(()=>cb.onWin(stars, moves+'걸음 만에 도착! (최단 '+optimal+'걸음)'), 300);
-    }
-  }
-  function onKey(e){
-    const map={ArrowUp:'N',ArrowDown:'S',ArrowLeft:'W',ArrowRight:'E'};
-    if(map[e.key]){ e.preventDefault(); ensureAudio(); tryMove(map[e.key]); }
-  }
-  window.addEventListener('keydown', onKey);
-  let touchStart=null;
-  function onTouchStart(e){ ensureAudio(); touchStart=[e.touches[0].clientX,e.touches[0].clientY]; }
-  function onTouchEnd(e){
-    if(!touchStart) return;
-    const dx=e.changedTouches[0].clientX-touchStart[0], dy=e.changedTouches[0].clientY-touchStart[1];
-    if(Math.hypot(dx,dy)>=20){
-      if(Math.abs(dx)>Math.abs(dy)) tryMove(dx>0?'E':'W');
-      else tryMove(dy>0?'S':'N');
-    }
-    touchStart=null;
-  }
-  canvas.addEventListener('touchstart', onTouchStart, {passive:true});
-  canvas.addEventListener('touchend', onTouchEnd, {passive:true});
-  function onClick(e){
-    ensureAudio();
-    const rect=canvas.getBoundingClientRect();
-    const x=e.clientX-rect.left-offX, y=e.clientY-rect.top-offY;
-    const c=Math.floor(x/cellPx), r=Math.floor(y/cellPx);
-    const [pr,pc]=player;
-    if(r===pr-1&&c===pc) tryMove('N');
-    else if(r===pr+1&&c===pc) tryMove('S');
-    else if(r===pr&&c===pc+1) tryMove('E');
-    else if(r===pr&&c===pc-1) tryMove('W');
-  }
-  canvas.addEventListener('click', onClick);
-
-  resize();
-  updateHud();
-  const onResize=()=>resize();
-  window.addEventListener('resize', onResize);
-  return {
-    destroy(){ window.removeEventListener('keydown', onKey); window.removeEventListener('resize', onResize); }
-  };
-}
-
-/* =========================================================================
-   GAME 9: MINI SUDOKU
-   ========================================================================= */
-function mountSudoku(area, cfg, cb){
-  const N=cfg.size, BOX=cfg.box, GIVENS=cfg.givens;
-  let solution, puzzle, given, selected=null, mistakes=0, ended=false;
-  cb.setGoal(N+'x'+N+' 스도쿠 — 가로·세로·박스에 숫자가 겹치지 않게 채우세요');
-  function updateHud(){ cb.setHud('실수 '+mistakes+'회'); }
-
-  function boxOf(r,c){ return [Math.floor(r/BOX[0])*BOX[0], Math.floor(c/BOX[1])*BOX[1]]; }
-  function valid(g,r,c,v){
-    for(let i=0;i<N;i++){ if(i!==c && g[r][i]===v) return false; if(i!==r && g[i][c]===v) return false; }
-    const [br,bc]=boxOf(r,c);
-    for(let i=0;i<BOX[0];i++)for(let j=0;j<BOX[1];j++){ const rr=br+i, cc=bc+j; if((rr!==r||cc!==c) && g[rr][cc]===v) return false; }
-    return true;
-  }
-  function generateSolved(){
-    const g=Array.from({length:N},()=>Array(N).fill(0));
-    function fill(pos){
-      if(pos===N*N) return true;
-      const r=Math.floor(pos/N), c=pos%N;
-      const nums=[]; for(let i=1;i<=N;i++) nums.push(i);
-      for(let i=nums.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [nums[i],nums[j]]=[nums[j],nums[i]]; }
-      for(const v of nums){ if(valid(g,r,c,v)){ g[r][c]=v; if(fill(pos+1)) return true; g[r][c]=0; } }
-      return false;
-    }
-    fill(0);
-    return g;
-  }
-  function makePuzzle(){
-    solution = generateSolved();
-    puzzle = solution.map(row=>row.slice());
-    given = Array.from({length:N},()=>Array(N).fill(true));
-    let toRemove = N*N - GIVENS;
-    const cells=[]; for(let r=0;r<N;r++)for(let c=0;c<N;c++) cells.push([r,c]);
-    for(let i=cells.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [cells[i],cells[j]]=[cells[j],cells[i]]; }
-    for(const [r,c] of cells){ if(toRemove<=0) break; puzzle[r][c]=0; given[r][c]=false; toRemove--; }
-  }
-
-  const wrapDiv=document.createElement('div');
-  wrapDiv.style.cssText='display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;width:100%;height:100%;';
-  const gridEl=document.createElement('div'); gridEl.className='pzGrid'; gridEl.style.gap='2px';
-  const rect=area.getBoundingClientRect();
-  const cellSize=Math.floor(Math.min(rect.width-24, rect.height*0.65)/N);
-  gridEl.style.gridTemplateColumns='repeat('+N+','+cellSize+'px)';
-  gridEl.style.gridTemplateRows='repeat('+N+','+cellSize+'px)';
-  wrapDiv.appendChild(gridEl);
-  const padEl=document.createElement('div');
-  padEl.style.cssText='display:flex; gap:6px; flex-wrap:wrap; justify-content:center; max-width:'+(cellSize*N+20)+'px;';
-  wrapDiv.appendChild(padEl);
-  area.appendChild(wrapDiv);
-
-  const cellEls=[];
-  function boxParityOf(r,c){ return (Math.floor(r/BOX[0]) + Math.floor(c/BOX[1])) % 2; }
-  function buildDom(){
-    gridEl.innerHTML=''; cellEls.length=0;
-    for(let r=0;r<N;r++){ const row=[];
-      for(let c=0;c<N;c++){
-        const cell=document.createElement('div'); cell.className='pzCell';
-        cell.style.width=cellSize+'px'; cell.style.height=cellSize+'px'; cell.style.fontSize=(cellSize*0.42)+'px'; cell.style.borderRadius='4px';
-        cell.addEventListener('pointerdown', ()=>onCellClick(r,c));
-        gridEl.appendChild(cell); row.push(cell);
-      }
-      cellEls.push(row);
-    }
-    padEl.innerHTML='';
-    for(let v=1;v<=N;v++){
-      const btn=document.createElement('button'); btn.className='pz-btn secondary'; btn.style.padding='8px 14px'; btn.style.fontSize='15px';
-      btn.textContent=v;
-      btn.addEventListener('click', ()=>onInput(v));
-      padEl.appendChild(btn);
-    }
-    const clearBtn=document.createElement('button'); clearBtn.className='pz-btn secondary'; clearBtn.style.padding='8px 14px'; clearBtn.textContent='지우기';
-    clearBtn.addEventListener('click', ()=>onInput(0));
-    padEl.appendChild(clearBtn);
-  }
-  function render(){
-    for(let r=0;r<N;r++)for(let c=0;c<N;c++){
-      const cell=cellEls[r][c]; const v=puzzle[r][c];
-      cell.textContent = v || '';
-      cell.style.color = given[r][c] ? '#fff' : '#8ecbff';
-      cell.style.fontWeight = given[r][c] ? '900' : '700';
-      const isSel = !!(selected && selected[0]===r && selected[1]===c);
-      cell.style.background = isSel ? 'rgba(255,224,102,0.28)' : (boxParityOf(r,c) ? 'rgba(255,255,255,0.09)' : 'rgba(255,255,255,0.04)');
-    }
-  }
-  function onCellClick(r,c){
-    if(ended || given[r][c]) return;
-    ensureAudio(); sfxClick();
-    selected=[r,c]; render();
-  }
-  function onInput(v){
-    if(!selected || ended) return;
-    const [r,c]=selected;
-    if(given[r][c]) return;
-    if(v===0){ puzzle[r][c]=0; render(); return; }
-    puzzle[r][c]=v;
-    if(v!==solution[r][c]){ mistakes++; updateHud(); sfxBad(); }
-    else sfxGood();
-    render();
-    checkWin();
-  }
-  function checkWin(){
-    for(let r=0;r<N;r++)for(let c=0;c<N;c++) if(puzzle[r][c]!==solution[r][c]) return;
-    if(!ended){
-      ended=true;
-      const stars = mistakes===0?3: mistakes<=2?2:1;
-      setTimeout(()=>cb.onWin(stars, '실수 '+mistakes+'회로 완성!'), 300);
-    }
-  }
-  makePuzzle(); buildDom(); render(); updateHud();
-  return { destroy(){} };
-}
-
-/* =========================================================================
-   GAME 10: NONOGRAM
-   ========================================================================= */
-const NONO_PATTERNS = {
-  heart5: [
-    [0,1,0,1,0],
-    [1,1,1,1,1],
-    [1,1,1,1,1],
-    [0,1,1,1,0],
-    [0,0,1,0,0],
-  ],
-  star5: [
-    [0,0,1,0,0],
-    [0,1,1,1,0],
-    [1,1,1,1,1],
-    [0,1,1,1,0],
-    [0,0,1,0,0],
-  ],
-  smile6: [
-    [0,1,1,1,1,0],
-    [1,0,0,0,0,1],
-    [0,1,0,0,1,0],
-    [1,0,0,0,0,1],
-    [1,0,1,1,0,1],
-    [0,1,1,1,1,0],
-  ],
-  tree7: [
-    [0,0,0,1,0,0,0],
-    [0,0,1,1,1,0,0],
-    [0,1,1,1,1,1,0],
-    [0,0,1,1,1,0,0],
-    [0,1,1,1,1,1,0],
-    [0,0,0,1,0,0,0],
-    [0,0,0,1,0,0,0],
-  ],
-  boat8: [
-    [0,0,0,0,1,0,0,0],
-    [0,0,0,1,1,0,0,0],
-    [0,0,1,1,1,0,0,0],
-    [0,1,1,1,1,0,0,0],
-    [0,0,0,0,1,0,0,0],
-    [0,1,1,1,1,1,1,0],
-    [1,1,1,1,1,1,1,1],
-    [0,0,1,1,1,1,0,0],
-  ],
-};
-function computeClues(pattern, axis){
-  const n=pattern.length, m=pattern[0].length;
-  const clues=[];
-  if(axis==='row'){
-    for(let r=0;r<n;r++){
-      const runs=[]; let cnt=0;
-      for(let c=0;c<m;c++){ if(pattern[r][c]){ cnt++; } else { if(cnt>0) runs.push(cnt); cnt=0; } }
-      if(cnt>0) runs.push(cnt);
-      clues.push(runs.length?runs:[0]);
-    }
-  } else {
-    for(let c=0;c<m;c++){
-      const runs=[]; let cnt=0;
-      for(let r=0;r<n;r++){ if(pattern[r][c]){ cnt++; } else { if(cnt>0) runs.push(cnt); cnt=0; } }
-      if(cnt>0) runs.push(cnt);
-      clues.push(runs.length?runs:[0]);
-    }
-  }
-  return clues;
-}
-function mountNonogram(area, cfg, cb){
-  const pattern = NONO_PATTERNS[cfg.id];
-  const ROWS=pattern.length, COLS=pattern[0].length;
-  const rowClues=computeClues(pattern,'row'), colClues=computeClues(pattern,'col');
-  let userGrid=Array.from({length:ROWS},()=>Array(COLS).fill(false));
-  let mistakes=0, ended=false;
-  cb.setGoal('힌트 숫자만큼 칸을 채워 그림을 완성하세요');
-  function updateHud(){ cb.setHud('실수 '+mistakes+'회'); }
-
-  const maxRowClueLen = Math.max(...rowClues.map(r=>r.length));
-  const maxColClueLen = Math.max(...colClues.map(c=>c.length));
-  const rect=area.getBoundingClientRect();
-  const rawSize = Math.min((rect.width-20-maxRowClueLen*20)/COLS, (rect.height-20-maxColClueLen*16)/ROWS);
-  const cs = Math.max(22, Math.min(rawSize, 46));
-
-  const wrapDiv=document.createElement('div');
-  wrapDiv.style.cssText='display:flex; align-items:center; justify-content:center;';
-  area.appendChild(wrapDiv);
-
-  const table=document.createElement('div');
-  table.style.cssText='display:grid; gap:2px;';
-  table.style.gridTemplateColumns=(maxRowClueLen*18)+'px repeat('+COLS+','+cs+'px)';
-  table.style.gridTemplateRows=(maxColClueLen*16)+'px repeat('+ROWS+','+cs+'px)';
-  wrapDiv.appendChild(table);
-
-  table.appendChild(document.createElement('div'));
-  for(let c=0;c<COLS;c++){
-    const hdr=document.createElement('div');
-    hdr.style.cssText='display:flex; flex-direction:column; align-items:center; justify-content:flex-end; font-size:11px; font-weight:700; opacity:0.85; line-height:1.15;';
-    hdr.innerHTML = colClues[c].join('<br>');
-    table.appendChild(hdr);
-  }
-  const cellEls=[];
-  for(let r=0;r<ROWS;r++){
-    const rowHdr=document.createElement('div');
-    rowHdr.style.cssText='display:flex; align-items:center; justify-content:flex-end; font-size:11px; font-weight:700; opacity:0.85; gap:4px; padding-right:4px;';
-    rowHdr.textContent = rowClues[r].join(' ');
-    table.appendChild(rowHdr);
-    const rowCells=[];
-    for(let c=0;c<COLS;c++){
-      const cell=document.createElement('div');
-      cell.style.cssText='width:'+cs+'px;height:'+cs+'px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:4px;cursor:pointer;';
-      cell.addEventListener('pointerdown', (e)=>{ e.preventDefault(); onCellClick(r,c); });
-      table.appendChild(cell);
-      rowCells.push(cell);
-    }
-    cellEls.push(rowCells);
-  }
-  function render(){
-    for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
-      cellEls[r][c].style.background = userGrid[r][c] ? '#63e6be' : 'rgba(255,255,255,0.06)';
-    }
-  }
-  function onCellClick(r,c){
-    if(ended) return;
-    ensureAudio();
-    userGrid[r][c] = !userGrid[r][c];
-    if(userGrid[r][c] && !pattern[r][c]){ mistakes++; updateHud(); sfxBad(); }
-    else sfxClick();
-    render();
-    checkWin();
-  }
-  function checkWin(){
-    for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
-      if(!!userGrid[r][c] !== !!pattern[r][c]) return;
-    }
-    if(!ended){
-      ended=true;
-      const stars = mistakes===0?3: mistakes<=2?2:1;
-      setTimeout(()=>cb.onWin(stars, '실수 '+mistakes+'회로 완성!'), 300);
-    }
-  }
-  render(); updateHud();
-  return { destroy(){} };
-}
-
-/* =========================================================================
-   GAME 11: BLOCK FIT
-   ========================================================================= */
-function mountBlockFit(area, cfg, cb){
-  const SIZE=cfg.size, TARGET=cfg.target, PIECE_BUDGET=cfg.pieces;
-  const SHAPES = [
-    {cells:[[0,0]], color:'#ff6b6b'},
-    {cells:[[0,0],[0,1]], color:'#ffa94d'},
-    {cells:[[0,0],[1,0]], color:'#ffd43b'},
-    {cells:[[0,0],[0,1],[0,2]], color:'#82c91e'},
-    {cells:[[0,0],[1,0],[2,0]], color:'#51cf66'},
-    {cells:[[0,0],[0,1],[1,0],[1,1]], color:'#22b8cf'},
-    {cells:[[0,0],[0,1],[0,2],[1,0]], color:'#4dabf7'},
-    {cells:[[0,0],[1,0],[1,1],[1,2]], color:'#748ffc'},
-    {cells:[[0,0],[0,1],[1,1],[1,2]], color:'#9775fa'},
-    {cells:[[0,1],[0,2],[1,0],[1,1]], color:'#e599f7'},
-    {cells:[[0,0],[0,1],[0,2],[1,1]], color:'#f783ac'},
-    {cells:[[1,0],[1,1],[1,2],[0,1]], color:'#ff8787'},
-    {cells:[[0,0],[1,0],[2,0],[1,1]], color:'#66d9e8'},
-    {cells:[[0,0],[0,1],[1,0],[2,0]], color:'#ffe066'},
-  ];
-  let board=Array.from({length:SIZE},()=>Array(SIZE).fill(null));
-  let tray=[], piecesUsed=0, score=0, ended=false;
-  cb.setGoal('블록을 놓아 목표 점수 '+TARGET+'점을 달성하세요 (블록 '+PIECE_BUDGET+'개 이내)');
-  function updateHud(){ cb.setHud('점수 '+score+' / '+TARGET+' · 남은 블록 '+(PIECE_BUDGET-piecesUsed)); }
-
-  function randomShape(){ return SHAPES[Math.floor(Math.random()*SHAPES.length)]; }
-  function refillTray(){ tray=[randomShape(),randomShape(),randomShape()].map(s=>({shape:s, used:false})); }
-
-  const wrapDiv=document.createElement('div');
-  wrapDiv.style.cssText='display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; width:100%; height:100%;';
-  const boardEl=document.createElement('div'); boardEl.className='pzGrid'; boardEl.style.gap='3px';
-  const rect=area.getBoundingClientRect();
-  const cellSize=Math.floor(Math.min(rect.width-24, rect.height*0.62)/SIZE);
-  boardEl.style.gridTemplateColumns='repeat('+SIZE+','+cellSize+'px)';
-  boardEl.style.gridTemplateRows='repeat('+SIZE+','+cellSize+'px)';
-  boardEl.style.background='rgba(0,0,0,0.2)'; boardEl.style.padding='6px'; boardEl.style.borderRadius='10px';
-  wrapDiv.appendChild(boardEl);
-  const trayEl=document.createElement('div');
-  trayEl.style.cssText='display:flex; gap:16px; justify-content:center;';
-  wrapDiv.appendChild(trayEl);
-  area.appendChild(wrapDiv);
-
-  const boardCells=[];
-  for(let r=0;r<SIZE;r++){ const row=[];
-    for(let c=0;c<SIZE;c++){
-      const cell=document.createElement('div');
-      cell.style.cssText='width:'+cellSize+'px;height:'+cellSize+'px;border-radius:4px;background:rgba(255,255,255,0.06);';
-      cell.dataset.r=r; cell.dataset.c=c;
-      boardEl.appendChild(cell); row.push(cell);
-    }
-    boardCells.push(row);
-  }
-  function renderBoard(){
-    for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++){
-      const v=board[r][c];
-      boardCells[r][c].style.background = v || 'rgba(255,255,255,0.06)';
-      boardCells[r][c].style.boxShadow = v ? 'inset 0 0 0 2px rgba(255,255,255,0.25)' : 'none';
-    }
-  }
-  function buildMiniShape(shape, unit){
-    const maxR=Math.max(...shape.cells.map(c=>c[0]))+1, maxC=Math.max(...shape.cells.map(c=>c[1]))+1;
-    const box=document.createElement('div');
-    box.style.cssText='position:relative; width:'+(maxC*unit)+'px; height:'+(maxR*unit)+'px;';
-    shape.cells.forEach(([dr,dc])=>{
-      const b=document.createElement('div');
-      b.style.cssText='position:absolute; left:'+(dc*unit)+'px; top:'+(dr*unit)+'px; width:'+(unit-2)+'px; height:'+(unit-2)+'px; background:'+shape.color+'; border-radius:3px;';
-      box.appendChild(b);
-    });
-    return box;
-  }
-  function renderTray(){
-    trayEl.innerHTML='';
-    tray.forEach((p, idx)=>{
-      const holder=document.createElement('div');
-      holder.style.cssText='width:64px;height:64px;display:flex;align-items:center;justify-content:center;';
-      if(!p.used){
-        const mini=buildMiniShape(p.shape, 14);
-        mini.style.cursor='grab';
-        mini.addEventListener('pointerdown', (e)=>onPieceDown(e, idx));
-        holder.appendChild(mini);
-      }
-      trayEl.appendChild(holder);
-    });
-  }
-
-  let dragging=null;
-  function cellFromPoint(x,y){
-    const el=document.elementFromPoint(x,y);
-    if(!el) return null;
-    let node=el;
-    while(node && node.dataset && node.dataset.r===undefined) node=node.parentElement;
-    if(!node || !node.dataset || node.dataset.r===undefined) return null;
-    return [parseInt(node.dataset.r,10), parseInt(node.dataset.c,10)];
-  }
-  function canPlace(shape, anchorR, anchorC){
-    for(const [dr,dc] of shape.cells){
-      const r=anchorR+dr, c=anchorC+dc;
-      if(r<0||r>=SIZE||c<0||c>=SIZE) return false;
-      if(board[r][c]) return false;
-    }
-    return true;
-  }
-  function highlightPreview(shape, anchorR, anchorC){
-    renderBoard();
-    if(anchorR===null||anchorR===undefined) return;
-    const ok=canPlace(shape, anchorR, anchorC);
-    for(const [dr,dc] of shape.cells){
-      const r=anchorR+dr, c=anchorC+dc;
-      if(r>=0&&r<SIZE&&c>=0&&c<SIZE){
-        boardCells[r][c].style.background = ok ? 'rgba(255,255,255,0.4)' : 'rgba(255,80,80,0.4)';
-      }
-    }
-  }
-  function onPieceDown(e, idx){
-    if(ended) return;
-    ensureAudio();
-    const p=tray[idx];
-    if(!p || p.used) return;
-    dragging = {idx, shape:p.shape, lastCell:null};
-    e.preventDefault();
-  }
-  function onPointerMove(e){
-    if(!dragging) return;
-    const pos=cellFromPoint(e.clientX, e.clientY);
-    dragging.lastCell = pos;
-    if(pos) highlightPreview(dragging.shape, pos[0], pos[1]);
-    else renderBoard();
-  }
-  function onPointerUp(e){
-    if(!dragging) return;
-    const shape=dragging.shape, idx=dragging.idx, cell=dragging.lastCell;
-    dragging=null;
-    if(cell && canPlace(shape, cell[0], cell[1])) placePiece(shape, cell[0], cell[1], idx);
-    else renderBoard();
-  }
-  window.addEventListener('pointermove', onPointerMove);
-  window.addEventListener('pointerup', onPointerUp);
-
-  function placePiece(shape, anchorR, anchorC, idx){
-    for(const [dr,dc] of shape.cells){ board[anchorR+dr][anchorC+dc] = shape.color; }
-    tray[idx].used = true;
-    piecesUsed++;
-    sfxClick();
-    const fullRows=[]; const fullCols=[];
-    for(let r=0;r<SIZE;r++){ if(board[r].every(v=>v)) fullRows.push(r); }
-    for(let c=0;c<SIZE;c++){ let full=true; for(let r=0;r<SIZE;r++) if(!board[r][c]) full=false; if(full) fullCols.push(c); }
-    fullRows.forEach(r=>{ for(let c=0;c<SIZE;c++) board[r][c]=null; });
-    fullCols.forEach(c=>{ for(let r=0;r<SIZE;r++) board[r][c]=null; });
-    const clearedLines = fullRows.length+fullCols.length;
-    const gained = shape.cells.length*2 + clearedLines*SIZE*8;
-    score += gained;
-    if(clearedLines>0) sfxGood();
-    renderBoard();
-    updateHud();
-    if(tray.every(p=>p.used)) refillTray();
-    renderTray();
-    checkEnd();
-  }
-  function anyPlaceable(){
-    for(const p of tray){
-      if(p.used) continue;
-      for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++){ if(canPlace(p.shape,r,c)) return true; }
-    }
-    return false;
-  }
-  function checkEnd(){
-    if(ended) return;
-    if(score>=TARGET){
-      ended=true;
-      const ratio=score/TARGET;
-      const stars = ratio>=1.6?3: ratio>=1.15?2:1;
-      setTimeout(()=>cb.onWin(stars, '최종 점수 '+score+'점'), 300);
-      return;
-    }
-    if(piecesUsed>=PIECE_BUDGET || !anyPlaceable()){
-      ended=true;
-      setTimeout(()=>cb.onLose(piecesUsed>=PIECE_BUDGET?'블록을 모두 사용했어요.':'더 이상 놓을 자리가 없어요.'), 300);
-    }
-  }
-
-  refillTray(); renderBoard(); renderTray(); updateHud();
-  return {
-    destroy(){ window.removeEventListener('pointermove', onPointerMove); window.removeEventListener('pointerup', onPointerUp); }
-  };
-}
 
 /* ================= Init ================= */
 renderHub();
