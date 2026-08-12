@@ -218,57 +218,59 @@ function worldTotalStars(worldId){ return (save[worldId]||[0,0,0,0,0]).reduce((a
 const WORLDS = [
   { id:'classic', name:'클래식 과일', icon:'🍉', color:'#37b24d', desc:'합쳐서 수박까지! 갈수록 목표가 커져요',
     stages:[
-      {drops:40, goal:'tier', tierTarget:5, label:'1단계'},
-      {drops:36, goal:'tier', tierTarget:6, label:'2단계'},
-      {drops:32, goal:'tier', tierTarget:7, label:'3단계'},
-      {drops:30, goal:'tier', tierTarget:8, label:'4단계'},
-      {drops:28, goal:'tier', tierTarget:10, label:'🍉 진짜 수박!'},
+      {drops:44, goal:'tier', tierTarget:4, label:'1단계'},
+      {drops:40, goal:'tier', tierTarget:5, label:'2단계'},
+      {drops:36, goal:'tier', tierTarget:6, label:'3단계'},
+      {drops:34, goal:'tier', tierTarget:7, label:'4단계'},
+      {drops:32, goal:'tier', tierTarget:9, label:'🍉 진짜 수박!'},
     ] },
   { id:'bomb', name:'폭탄 과일', icon:'💣', color:'#ff8787', desc:'폭탄 종류가 스테이지마다 늘어나요',
     stages:[
-      {drops:26, target:60, bombTypes:['score'], bombChance:0.16, label:'점수 폭탄'},
-      {drops:26, target:90, bombTypes:['score','dud'], bombChance:0.18, label:'꽝 폭탄 등장'},
-      {drops:28, target:130, bombTypes:['dud','shock'], bombChance:0.2, label:'충격파 폭탄'},
-      {drops:28, target:170, bombTypes:['score','dud','shock'], bombChance:0.22, label:'폭탄 3종 세트'},
-      {drops:30, target:230, bombTypes:['score','dud','shock'], bombChance:0.28, label:'💥 폭탄 대잔치'},
+      {drops:28, target:45, bombTypes:['score'], bombChance:0.16, label:'점수 폭탄'},
+      {drops:28, target:70, bombTypes:['score','dud'], bombChance:0.16, label:'꽝 폭탄 등장'},
+      {drops:30, target:100, bombTypes:['dud','shock'], bombChance:0.18, label:'충격파 폭탄'},
+      {drops:30, target:135, bombTypes:['score','dud','shock'], bombChance:0.2, label:'폭탄 3종 세트'},
+      {drops:32, target:180, bombTypes:['score','dud','shock'], bombChance:0.24, label:'💥 폭탄 대잔치'},
     ] },
   { id:'obstacle', name:'회전 장애물', icon:'🌀', color:'#748ffc', desc:'통나무가 갈수록 길고 많아져요',
     stages:[
-      {drops:26, target:70, obstacleCount:1, obstacleLen:0.22, obstacleSpeed:0.5, label:'통나무 1개'},
-      {drops:26, target:110, obstacleCount:1, obstacleLen:0.34, obstacleSpeed:0.58, label:'더 길어진 통나무'},
-      {drops:28, target:150, obstacleCount:2, obstacleLen:0.42, obstacleSpeed:0.62, label:'통나무 2개'},
-      {drops:28, target:190, obstacleCount:2, obstacleLen:0.5, obstacleSpeed:0.7, label:'더 크고 빠르게'},
-      {drops:30, target:250, obstacleCount:3, obstacleLen:0.58, obstacleSpeed:0.78, label:'🌀 회전날 3개'},
+      {drops:28, target:55, obstacleCount:1, obstacleLen:0.2, obstacleSpeed:0.42, label:'통나무 1개'},
+      {drops:28, target:85, obstacleCount:1, obstacleLen:0.3, obstacleSpeed:0.48, label:'더 길어진 통나무'},
+      {drops:30, target:115, obstacleCount:2, obstacleLen:0.38, obstacleSpeed:0.52, label:'통나무 2개'},
+      {drops:30, target:150, obstacleCount:2, obstacleLen:0.44, obstacleSpeed:0.58, label:'더 크고 빠르게'},
+      {drops:32, target:195, obstacleCount:3, obstacleLen:0.5, obstacleSpeed:0.65, label:'🌀 회전날 3개'},
     ] },
   { id:'animal', name:'동물농장', icon:'🐘', color:'#ffa94d', desc:'병아리부터 매머드까지! 히트박스도 생긴대로',
     stages:[
-      {drops:30, animal:true, goal:'score', target:70, label:'병아리부터 시작'},
-      {drops:28, animal:true, goal:'tier', tierTarget:3, label:'돼지까지!'},
-      {drops:28, animal:true, goal:'score', target:160, label:'점수 목표'},
-      {drops:26, animal:true, goal:'tier', tierTarget:5, label:'코끼리까지!'},
-      {drops:26, animal:true, goal:'tier', tierTarget:6, label:'🦣 매머드 완성!'},
+      {drops:32, animal:true, goal:'score', target:55, label:'병아리부터 시작'},
+      {drops:30, animal:true, goal:'tier', tierTarget:2, label:'양까지!'},
+      {drops:30, animal:true, goal:'score', target:125, label:'점수 목표'},
+      {drops:28, animal:true, goal:'tier', tierTarget:4, label:'소까지!'},
+      {drops:28, animal:true, goal:'tier', tierTarget:6, label:'🦣 매머드 완성!'},
     ] },
   { id:'gravity', name:'중력 미로', icon:'🧭', color:'#63e6be', desc:'중력 방향이 게임 중에 계속 바뀌어요! 표지판을 잘 보세요',
     stages:[
-      {drops:26, target:60, gravityDir:'down', gravitySwitch:true, gravitySwitchPeriod:6.5, label:'⬇️ 천천히 전환'},
-      {drops:28, target:90, gravityDir:'right', gravitySwitch:true, gravitySwitchPeriod:5.5, label:'➡️ 조금 더 빠르게'},
-      {drops:28, target:110, gravityDir:'left', gravitySwitch:true, gravitySwitchPeriod:4.5, label:'⬅️ 빠른 전환'},
-      {drops:30, target:140, gravityDir:'up', gravitySwitch:true, gravitySwitchPeriod:3.6, label:'⬆️ 더 빠르게!'},
-      {drops:34, target:180, gravityDir:'spin', label:'🌪️ 빙글빙글 중력'},
+      {drops:28, target:45, gravityDir:'down', gravitySwitch:true, gravitySwitchPeriod:8, label:'⬇️ 천천히 전환'},
+      {drops:30, target:70, gravityDir:'right', gravitySwitch:true, gravitySwitchPeriod:7, label:'➡️ 조금 더 빠르게'},
+      {drops:30, target:90, gravityDir:'left', gravitySwitch:true, gravitySwitchPeriod:6, label:'⬅️ 빠른 전환'},
+      {drops:32, target:115, gravityDir:'up', gravitySwitch:true, gravitySwitchPeriod:5, label:'⬆️ 더 빠르게!'},
+      {drops:36, target:150, gravityDir:'spin', label:'🌪️ 빙글빙글 중력'},
     ] },
   { id:'meteor', name:'운석 낙하', icon:'☄️', color:'#ff922b', desc:'하늘에서 운석이 떨어져요! 충격으로 과일이 와르르 쏟아져요',
     stages:[
-      {drops:26, target:70, meteorPeriod:5.5, label:'가끔 떨어지는 운석'},
-      {drops:28, target:110, meteorPeriod:4.4, label:'더 자주 떨어짐'},
-      {drops:28, target:150, meteorPeriod:3.5, label:'운석비'},
-      {drops:30, target:190, meteorPeriod:2.8, label:'거센 운석비'},
-      {drops:32, target:250, meteorPeriod:2.2, label:'☄️ 운석 폭풍'},
+      {drops:28, target:55, meteorPeriod:6.5, label:'가끔 떨어지는 운석'},
+      {drops:30, target:85, meteorPeriod:5.4, label:'더 자주 떨어짐'},
+      {drops:30, target:115, meteorPeriod:4.4, label:'운석비'},
+      {drops:32, target:150, meteorPeriod:3.6, label:'거센 운석비'},
+      {drops:34, target:195, meteorPeriod:2.8, label:'☄️ 운석 폭풍'},
     ] },
 ];
 
+const UNLOCK_THRESHOLDS = [0, 3, 6, 9, 12, 15];
 function isWorldUnlocked(wi){
   if(wi===0) return true;
-  return worldTotalStars(WORLDS[wi-1].id) >= 3;
+  const need = UNLOCK_THRESHOLDS[wi] || 15;
+  return worldTotalStars(WORLDS[wi-1].id) >= need;
 }
 function isStageUnlocked(wi, si){
   if(si===0) return true;
@@ -341,13 +343,15 @@ function renderHub(){
   WORLDS.forEach((w, wi)=>{
     const unlocked = isWorldUnlocked(wi);
     const total = worldTotalStars(w.id);
+    const prevTotal = wi>0 ? worldTotalStars(WORLDS[wi-1].id) : 0;
+    const need = UNLOCK_THRESHOLDS[wi] || 15;
     const card = document.createElement('div');
     card.className = 'worldCard' + (unlocked?'':' locked');
     card.innerHTML =
       '<div class="planetIcon" style="background:'+w.color+';">'+w.icon+'</div>'+
       '<div class="worldInfo"><h3>'+w.name+'</h3><p>'+w.desc+'</p>'+
       '<div class="worldStars">⭐ '+total+' / 15</div></div>'+
-      (unlocked?'':'<div class="lockIcon">🔒</div>');
+      (unlocked?'':'<div class="lockIcon">🔒 ⭐'+prevTotal+'/'+need+'</div>');
     if(unlocked){
       card.addEventListener('click', function(){ sfxClick(); ensureAudio(); goStages(wi); });
     }
@@ -482,17 +486,17 @@ function measureEmojiShape(emoji){
 }
 function mountMerge(area, cfg, cb){
   const FRUITS = [
-    { r:14, color:'#ff6b6b', hi:'#ffb3b3', score:1, name:'체리', emoji:'🍒' },
-    { r:19, color:'#ffa94d', hi:'#ffd8a8', score:3, name:'귤', emoji:'🍊' },
-    { r:25, color:'#fff3bf', hi:'#fffde0', score:6, name:'레몬', emoji:'🍋' },
-    { r:32, color:'#8ce99a', hi:'#d3f9d8', score:10, name:'키위', emoji:'🥝' },
-    { r:40, color:'#ff8787', hi:'#ffc9c9', score:15, name:'딸기', emoji:'🍓' },
-    { r:49, color:'#ff6b6b', hi:'#ffa8a8', score:21, name:'토마토', emoji:'🍅' },
-    { r:59, color:'#ffb28a', hi:'#ffd8be', score:28, name:'복숭아', emoji:'🍑' },
-    { r:71, color:'#9c36b5', hi:'#e599f7', score:36, name:'포도', emoji:'🍇' },
-    { r:85, color:'#ff8787', hi:'#ffc9c9', score:45, name:'사과', emoji:'🍎' },
-    { r:102,color:'#d9b38c', hi:'#ecd4b4', score:55, name:'배', emoji:'🍐' },
-    { r:124,color:'#2b8a3e', hi:'#40c057', score:100, name:'수박', emoji:'🍉' },
+    { r:14, color:'#ff6b6b', hi:'#ffb3b3', score:1, name:'체리' },
+    { r:19, color:'#ffa94d', hi:'#ffd8a8', score:3, name:'귤' },
+    { r:25, color:'#ff922b', hi:'#ffc078', score:6, name:'오렌지' },
+    { r:32, color:'#f9d923', hi:'#fff3bf', score:10, name:'레몬' },
+    { r:40, color:'#82c91e', hi:'#c0eb75', score:15, name:'라임' },
+    { r:49, color:'#ff4d6d', hi:'#ff8fa3', score:21, name:'토마토' },
+    { r:59, color:'#e64980', hi:'#faa2c1', score:28, name:'복숭아' },
+    { r:71, color:'#9c36b5', hi:'#e599f7', score:36, name:'자두' },
+    { r:85, color:'#37b24d', hi:'#8ce99a', score:45, name:'사과' },
+    { r:102,color:'#2f9e44', hi:'#69db7c', score:55, name:'배' },
+    { r:124,color:'#2b8a3e', hi:'#40c057', score:100, name:'수박' },
   ];
   const ANIMALS = [
     { r:18, color:'#fff3bf', hi:'#fff9db', score:2, emoji:'🐥', weight:0.6, name:'병아리' },
@@ -728,7 +732,7 @@ function mountMerge(area, cfg, cb){
   function updateMeteors(dt){
     if(!cfg.meteorPeriod) return;
     meteorTimer -= dt;
-    if(meteorTimer<=0){ spawnMeteor(); meteorTimer = cfg.meteorPeriod*(0.75+Math.random()*0.5); }
+    if(meteorTimer<=0){ if(dropsLeft>0) spawnMeteor(); meteorTimer = cfg.meteorPeriod*(0.75+Math.random()*0.5); }
     for(const m of meteors){
       if(m.dead) continue;
       m.trail.push({x:m.x,y:m.y,age:0});
@@ -919,7 +923,7 @@ function mountMerge(area, cfg, cb){
 
     const goalMet = cfg.goal==='tier' ? maxTierEver>=cfg.tierTarget : score>=cfg.target;
     if(!ended && dropsLeft<=0 && !goalMet){
-      if(GDIR==='spin' || cfg.gravitySwitch){
+      if(GDIR==='spin' || cfg.gravitySwitch || cfg.meteorPeriod){
         exhaustTimer += dt;
         if(exhaustTimer>1.4) endLose('드롭 횟수를 모두 사용했어요.');
       } else if(bodies.every(b=>Math.abs(b.vy)<5)){
