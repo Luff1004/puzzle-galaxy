@@ -133,6 +133,14 @@
       <div id="worldList"></div>
     </section>
 
+    <section id="screen-secret-hub" class="screen">
+      <div class="hubTitle">
+        <h1>🌌 비밀의 방</h1>
+        <p>리믹스 맵을 골라보세요</p>
+      </div>
+      <div id="secretWorldList"></div>
+    </section>
+
     <section id="screen-stages" class="screen">
       <div class="stagesTitle">
         <h2 id="stagesWorldTitle"></h2>
@@ -266,14 +274,51 @@ const WORLDS = [
       {drops:32, target:195, laserCount:3, laserSpeed:1.7, label:'⚡ 레이저 그물 3줄'},
     ] },
 ];
-WORLDS.push({ id:'secret', name:'비밀의 방', icon:'🌌', color:'#845ef7', desc:'모든 걸 다 갈아엎은 리믹스 스테이지',
-  stages:[
-    {drops:26, target:110, bombTypes:['nuke'], bombChance:0.14, label:'☢️ 핵폭탄'},
-    {drops:28, target:150, meteorPeriod:3.4, meteorDestroy:true, label:'☄️ 파괴 운석'},
-    {drops:26, animal:true, animalScale:1.6, goal:'tier', tierTarget:5, label:'🦣 초대형 동물'},
-    {drops:22, fruitScale:0.55, tripleDrop:true, target:230, label:'🔬 미니 과일 3연발'},
-    {drops:30, zeroGravity:true, target:170, label:'🌌 무중력 파티'},
-  ] });
+const SECRET_GATE = { id:'secret', name:'비밀의 방', icon:'🌌', color:'#845ef7', desc:'별을 모으면 열리는 리믹스 로비' };
+WORLDS.push(SECRET_GATE);
+
+const SECRET_WORLDS = [
+  { id:'nuke', name:'핵폭탄', icon:'☢️', color:'#ff2d2d', desc:'닿으면 화면을 통째로 쓸어버리는 핵폭탄',
+    stages:[
+      {drops:26, target:70, bombTypes:['nuke'], bombChance:0.12, label:'핵폭탄 등장'},
+      {drops:26, target:100, bombTypes:['nuke'], bombChance:0.14, label:'조금 더 자주'},
+      {drops:28, target:140, bombTypes:['nuke'], bombChance:0.16, label:'핵폭탄 러시'},
+      {drops:28, target:190, bombTypes:['nuke'], bombChance:0.18, label:'더 자주 더 세게'},
+      {drops:30, target:250, bombTypes:['nuke'], bombChance:0.22, label:'☢️☢️ 핵폭탄 폭주'},
+    ] },
+  { id:'destroyMeteor', name:'파괴 운석', icon:'☄️', color:'#ff922b', desc:'튕기기만 하던 운석이 이제 과일을 진짜로 파괴해요',
+    stages:[
+      {drops:26, target:70, meteorPeriod:5.5, meteorDestroy:true, label:'파괴 운석 등장'},
+      {drops:28, target:105, meteorPeriod:4.5, meteorDestroy:true, label:'더 자주'},
+      {drops:28, target:145, meteorPeriod:3.6, meteorDestroy:true, label:'운석비'},
+      {drops:30, target:190, meteorPeriod:2.9, meteorDestroy:true, label:'거센 파괴 운석비'},
+      {drops:32, target:250, meteorPeriod:2.3, meteorDestroy:true, label:'☄️ 절멸 운석'},
+    ] },
+  { id:'giant', name:'초대형 동물', icon:'🦣', color:'#ffa94d', desc:'평소보다 훨씬 큰 동물들로 가득한 농장',
+    stages:[
+      {drops:30, animal:true, animalScale:1.3, goal:'score', target:60, label:'커진 병아리들'},
+      {drops:28, animal:true, animalScale:1.4, goal:'tier', tierTarget:2, label:'거대 양까지!'},
+      {drops:28, animal:true, animalScale:1.5, goal:'score', target:140, label:'점수 목표'},
+      {drops:26, animal:true, animalScale:1.6, goal:'tier', tierTarget:4, label:'거대 소까지!'},
+      {drops:26, animal:true, animalScale:1.8, goal:'tier', tierTarget:6, label:'🦣 초초대형 매머드'},
+    ] },
+  { id:'miniTriple', name:'미니 3연발', icon:'🔬', color:'#63e6be', desc:'과일이 훨씬 작아지고, 한 번에 3개씩 떨어져요',
+    stages:[
+      {drops:22, fruitScale:0.75, tripleDrop:true, target:90, label:'작아진 과일'},
+      {drops:22, fruitScale:0.68, tripleDrop:true, target:130, label:'더 작게'},
+      {drops:24, fruitScale:0.62, tripleDrop:true, target:175, label:'점점 더 작게'},
+      {drops:24, fruitScale:0.58, tripleDrop:true, target:225, label:'훨씬 더 작게'},
+      {drops:26, fruitScale:0.5, tripleDrop:true, target:290, label:'🔬 초미니 3연발'},
+    ] },
+  { id:'zeroG', name:'무중력 파티', icon:'🌌', color:'#845ef7', desc:'중력이 거의 사라져요! 과일이 둥둥 떠다녀요',
+    stages:[
+      {drops:26, zeroGravity:true, target:80, label:'약한 중력'},
+      {drops:28, zeroGravity:true, target:115, label:'점점 더 둥실둥실'},
+      {drops:30, zeroGravity:true, target:150, label:'거의 무중력'},
+      {drops:32, zeroGravity:true, target:190, label:'완전 무중력'},
+      {drops:36, zeroGravity:true, target:240, label:'🌌 무중력 카오스'},
+    ] },
+];
 
 const UNLOCK_THRESHOLDS = [0, 3, 6, 9, 12, 15];
 const SECRET_RATIO = 0.75;
@@ -282,25 +327,29 @@ function secretThreshold(){ return Math.ceil(maxPossibleStars()*SECRET_RATIO); }
 function totalStarsAll(){
   return WORLDS.filter(w=>w.id!=='secret').reduce((sum,w)=>sum+worldTotalStars(w.id),0);
 }
+function isWorldUnlockedIn(list, wi){
+  if(wi===0) return true;
+  const need = UNLOCK_THRESHOLDS[wi] || 15;
+  return worldTotalStars(list[wi-1].id) >= need;
+}
 function isWorldUnlocked(wi){
   const w = WORLDS[wi];
   if(w.id==='secret') return totalStarsAll() >= secretThreshold();
-  if(wi===0) return true;
-  const need = UNLOCK_THRESHOLDS[wi] || 15;
-  return worldTotalStars(WORLDS[wi-1].id) >= need;
+  return isWorldUnlockedIn(WORLDS, wi);
 }
-function isStageUnlocked(wi, si){
+function isStageUnlocked(list, wi, si){
   if(si===0) return true;
-  return getStars(WORLDS[wi].id, si-1) >= 1;
+  return getStars(list[wi].id, si-1) >= 1;
 }
 
 /* ================= App / Navigation ================= */
-const screens = { hub: byId('screen-hub'), stages: byId('screen-stages'), play: byId('screen-play') };
+const screens = { hub: byId('screen-hub'), secretHub: byId('screen-secret-hub'), stages: byId('screen-stages'), play: byId('screen-play') };
 function byId(id){ return document.getElementById(id); }
 const backBtn = byId('backBtn'), restartBtn = byId('restartBtn'), hudTitle = byId('hudTitle'), hudStat = byId('hudStat');
 const resultOverlay = byId('resultOverlay');
 
 let nav = ['hub'];
+let currentList = WORLDS;
 let currentWorldIdx = 0, currentStageIdx = 0;
 let activeGame = null; // {destroy, restart}
 
@@ -318,33 +367,43 @@ function goHub(){
   renderHub();
   showScreen('hub');
 }
-function goStages(wi){
-  nav = ['hub','stages'];
+function goSecretHub(){
+  nav = ['hub','secretHub'];
+  destroyActiveGame();
+  hudTitle.textContent = '🌌 비밀의 방';
+  renderSecretHub();
+  showScreen('secretHub');
+}
+function goStages(list, wi){
+  currentList = list;
+  nav = list===SECRET_WORLDS ? ['hub','secretHub','stages'] : ['hub','stages'];
   destroyActiveGame();
   currentWorldIdx = wi;
-  const w = WORLDS[wi];
+  const w = list[wi];
   hudTitle.textContent = w.icon+' '+w.name;
   byId('stagesWorldTitle').textContent = w.icon+' '+w.name;
   byId('stagesWorldDesc').textContent = w.desc;
-  renderStages(wi);
+  renderStages(list, wi);
   showScreen('stages');
 }
-function goPlay(wi, si){
-  nav = ['hub','stages','play'];
+function goPlay(list, wi, si){
+  currentList = list;
+  nav = (list===SECRET_WORLDS ? ['hub','secretHub','stages','play'] : ['hub','stages','play']);
   currentWorldIdx = wi; currentStageIdx = si;
-  const w = WORLDS[wi];
+  const w = list[wi];
   hudTitle.textContent = w.icon+' '+w.name+' · '+(si+1)+'단계';
   showScreen('play');
-  launchStage(wi, si);
+  launchStage(list, wi, si);
 }
 backBtn.addEventListener('click', function(){
   if(nav.length<=1){ return; }
   nav.pop();
   const target = nav[nav.length-1];
   if(target==='hub') goHub();
-  else if(target==='stages') goStages(currentWorldIdx);
+  else if(target==='secretHub') goSecretHub();
+  else if(target==='stages') goStages(currentList, currentWorldIdx);
 });
-restartBtn.addEventListener('click', function(){ ensureAudio(); launchStage(currentWorldIdx, currentStageIdx); });
+restartBtn.addEventListener('click', function(){ ensureAudio(); launchStage(currentList, currentWorldIdx, currentStageIdx); });
 
 function destroyActiveGame(){
   if(activeGame && activeGame.destroy){ try{ activeGame.destroy(); }catch(e){} }
@@ -363,15 +422,22 @@ function renderHub(){
     const total = worldTotalStars(w.id);
     const card = document.createElement('div');
     card.className = 'worldCard' + (unlocked?'':' locked') + (isSecret?' secretCard':'');
-    if(isSecret && !unlocked){
-      const cur = totalStarsAll(), need = secretThreshold();
-      card.innerHTML =
-        '<div class="planetIcon" style="background:#2b2450;">❓</div>'+
-        '<div class="worldInfo"><h3>???</h3><p>총 별 '+need+'개를 모으면 열려요</p>'+
-        '<div class="worldStars">⭐ '+cur+' / '+need+'</div></div>'+
-        '<div class="lockIcon">🔒</div>';
+    if(isSecret){
+      if(!unlocked){
+        const cur = totalStarsAll(), need = secretThreshold();
+        card.innerHTML =
+          '<div class="planetIcon" style="background:#2b2450;">❓</div>'+
+          '<div class="worldInfo"><h3>???</h3><p>총 별 '+need+'개를 모으면 열려요</p>'+
+          '<div class="worldStars">⭐ '+cur+' / '+need+'</div></div>'+
+          '<div class="lockIcon">🔒</div>';
+      } else {
+        card.innerHTML =
+          '<div class="planetIcon" style="background:'+w.color+';">'+w.icon+'</div>'+
+          '<div class="worldInfo"><h3>'+w.name+'</h3><p>'+w.desc+'</p>'+
+          '<div class="worldStars">✨ 5개의 리믹스 맵 입장</div></div>';
+      }
     } else {
-      const prevTotal = (wi>0 && !isSecret) ? worldTotalStars(WORLDS[wi-1].id) : 0;
+      const prevTotal = wi>0 ? worldTotalStars(WORLDS[wi-1].id) : 0;
       const need = UNLOCK_THRESHOLDS[wi] || 15;
       card.innerHTML =
         '<div class="planetIcon" style="background:'+w.color+';">'+w.icon+'</div>'+
@@ -380,15 +446,39 @@ function renderHub(){
         (unlocked?'':'<div class="lockIcon">🔒 ⭐'+prevTotal+'/'+need+'</div>');
     }
     if(unlocked){
-      card.addEventListener('click', function(){ sfxClick(); ensureAudio(); goStages(wi); });
+      card.addEventListener('click', function(){
+        sfxClick(); ensureAudio();
+        if(isSecret) goSecretHub(); else goStages(WORLDS, wi);
+      });
+    }
+    list.appendChild(card);
+  });
+}
+function renderSecretHub(){
+  const list = byId('secretWorldList');
+  list.innerHTML = '';
+  SECRET_WORLDS.forEach((w, wi)=>{
+    const unlocked = isWorldUnlockedIn(SECRET_WORLDS, wi);
+    const total = worldTotalStars(w.id);
+    const prevTotal = wi>0 ? worldTotalStars(SECRET_WORLDS[wi-1].id) : 0;
+    const need = UNLOCK_THRESHOLDS[wi] || 15;
+    const card = document.createElement('div');
+    card.className = 'worldCard secretCard' + (unlocked?'':' locked');
+    card.innerHTML =
+      '<div class="planetIcon" style="background:'+w.color+';">'+w.icon+'</div>'+
+      '<div class="worldInfo"><h3>'+w.name+'</h3><p>'+w.desc+'</p>'+
+      '<div class="worldStars">⭐ '+total+' / 15</div></div>'+
+      (unlocked?'':'<div class="lockIcon">🔒 ⭐'+prevTotal+'/'+need+'</div>');
+    if(unlocked){
+      card.addEventListener('click', function(){ sfxClick(); ensureAudio(); goStages(SECRET_WORLDS, wi); });
     }
     list.appendChild(card);
   });
 }
 
 /* ---------- Stage select rendering ---------- */
-function renderStages(wi){
-  const w = WORLDS[wi];
+function renderStages(list, wi){
+  const w = list[wi];
   const map = byId('stageMap');
   map.innerHTML = '';
   for(let si=0; si<w.stages.length; si++){
@@ -397,7 +487,7 @@ function renderStages(wi){
       conn.className = 'stageConnector';
       map.appendChild(conn);
     }
-    const unlocked = isStageUnlocked(wi, si);
+    const unlocked = isStageUnlocked(list, wi, si);
     const stars = getStars(w.id, si);
     const nodeWrap = document.createElement('div');
     nodeWrap.className = 'stageNodeWrap';
@@ -410,7 +500,7 @@ function renderStages(wi){
     starsEl.textContent = unlocked ? ('★'.repeat(stars)+'☆'.repeat(3-stars)) : '';
     node.appendChild(starsEl);
     if(unlocked){
-      node.addEventListener('click', function(){ sfxClick(); ensureAudio(); goPlay(wi, si); });
+      node.addEventListener('click', function(){ sfxClick(); ensureAudio(); goPlay(list, wi, si); });
     }
     nodeWrap.appendChild(node);
     map.appendChild(nodeWrap);
@@ -428,11 +518,13 @@ function showCheatToast(){
 }
 function unlockAllMaps(){
   WORLDS.forEach(w=>{ save[w.id] = [3,3,3,3,3]; });
+  SECRET_WORLDS.forEach(w=>{ save[w.id] = [3,3,3,3,3]; });
   writeSave();
   sfxWin();
   showCheatToast();
   if(screens.hub.classList.contains('active')) renderHub();
-  if(screens.stages.classList.contains('active')) renderStages(currentWorldIdx);
+  if(screens.secretHub.classList.contains('active')) renderSecretHub();
+  if(screens.stages.classList.contains('active')) renderStages(currentList, currentWorldIdx);
 }
 let cheatKeyBuffer = '';
 window.addEventListener('keydown', function(e){
@@ -472,24 +564,24 @@ function showResult(win, stars, subtitle, opts){
   const retry = document.createElement('button');
   retry.className = 'pz-btn secondary';
   retry.textContent = '다시 하기';
-  retry.addEventListener('click', function(){ hideResult(); launchStage(currentWorldIdx, currentStageIdx); });
+  retry.addEventListener('click', function(){ hideResult(); launchStage(currentList, currentWorldIdx, currentStageIdx); });
   btns.appendChild(retry);
 
   if(win){
-    const w = WORLDS[currentWorldIdx];
+    const w = currentList[currentWorldIdx];
     const hasNext = currentStageIdx < w.stages.length-1;
     if(hasNext){
       const nextBtn = document.createElement('button');
       nextBtn.className = 'pz-btn';
       nextBtn.textContent = '다음 스테이지 ▶';
-      nextBtn.addEventListener('click', function(){ hideResult(); goPlay(currentWorldIdx, currentStageIdx+1); });
+      nextBtn.addEventListener('click', function(){ hideResult(); goPlay(currentList, currentWorldIdx, currentStageIdx+1); });
       btns.appendChild(nextBtn);
     }
   }
   const mapBtn = document.createElement('button');
   mapBtn.className = 'pz-btn secondary';
   mapBtn.textContent = '스테이지 맵';
-  mapBtn.addEventListener('click', function(){ hideResult(); goStages(currentWorldIdx); });
+  mapBtn.addEventListener('click', function(){ hideResult(); goStages(currentList, currentWorldIdx); });
   btns.appendChild(mapBtn);
 
   resultOverlay.classList.add('show');
@@ -497,9 +589,9 @@ function showResult(win, stars, subtitle, opts){
 function hideResult(){ resultOverlay.classList.remove('show'); }
 
 /* ---------- Stage launcher ---------- */
-function launchStage(wi, si){
+function launchStage(list, wi, si){
   destroyActiveGame();
-  const w = WORLDS[wi];
+  const w = list[wi];
   const cfg = w.stages[si];
   const area = byId('playArea');
   const goalEl = byId('playGoal');
