@@ -3,14 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>과일 갤럭시 - 미쳐가는 과일 합치기</title>
+<title>워터메로니 - 미쳐가는 과일 합치기</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none; -webkit-user-select:none; touch-action:none; }
-  html,body{ width:100%; height:100%; overflow:hidden; background:#0a0818; font-family:'Segoe UI','Apple SD Gothic Neo','Malgun Gothic',sans-serif; color:#fff; display:flex; align-items:center; justify-content:center; }
+  html,body{ width:100%; height:100%; overflow:hidden; background:#2b1c12; font-family:'Segoe UI','Apple SD Gothic Neo','Malgun Gothic',sans-serif; color:#fff; display:flex; align-items:center; justify-content:center; }
 
-  #starfield{ position:absolute; inset:0; z-index:0; overflow:hidden; background:radial-gradient(ellipse at 50% -10%, #362a5e 0%, #1a1530 45%, #0a0818 100%); }
-  .star{ position:absolute; background:#fff; border-radius:50%; opacity:0.7; animation: twinkle 3s infinite ease-in-out; }
-  @keyframes twinkle{ 0%,100%{opacity:0.2;} 50%{opacity:1;} }
+  #starfield{ position:absolute; inset:0; z-index:0; overflow:hidden; background:radial-gradient(ellipse at 50% -10%, #6b4226 0%, #40270f 45%, #1f1109 100%); }
+  #starfield::before{ content:''; position:absolute; inset:0; opacity:0.5; background-image:
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.025) 0 2px, transparent 2px 38px),
+      repeating-linear-gradient(90deg, rgba(255,255,255,0.025) 0 2px, transparent 2px 38px); }
+  .star{ position:absolute; border-radius:50%; opacity:0.7; animation: twinkle 3s infinite ease-in-out; filter:drop-shadow(0 0 3px rgba(255,214,102,0.5)); }
+  @keyframes twinkle{ 0%,100%{opacity:0.15;} 50%{opacity:0.9;} }
 
   #wrap{ position:relative; width:100%; height:100%; max-width:480px; max-height:900px; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 0 60px rgba(0,0,0,0.7); background:transparent; z-index:1; }
 
@@ -29,7 +32,7 @@
 
   /* HUB */
   #screen-hub .hubTitle{ text-align:center; margin:8px 0 4px; }
-  #screen-hub .hubTitle h1{ font-size:26px; background:linear-gradient(90deg,#ffd166,#ff6b6b,#c77dff,#4dabf7); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  #screen-hub .hubTitle h1{ font-size:26px; background:linear-gradient(90deg,#ffd166,#ff922b,#ff6b6b,#ffa94d); -webkit-background-clip:text; background-clip:text; color:transparent; }
   #screen-hub .hubTitle p{ font-size:12px; opacity:0.6; margin-top:2px; }
   #worldList{ display:flex; flex-direction:column; gap:14px; margin-top:14px; padding-bottom:20px; }
   .worldCard{
@@ -109,6 +112,31 @@
   button.pz-btn:active{ transform:scale(0.95); }
 
   ::-webkit-scrollbar{ width:0; height:0; }
+
+  /* LOBBY */
+  .lobbyWrap{ display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; text-align:center; gap:10px; padding:20px; }
+  .lobbyFruitDeco{ font-size:34px; letter-spacing:4px; filter:drop-shadow(0 4px 10px rgba(0,0,0,0.4)); }
+  .lobbyTitle{ font-size:44px; font-weight:900; background:linear-gradient(90deg,#ffd166,#ff922b,#ff6b6b,#ffa94d); -webkit-background-clip:text; background-clip:text; color:transparent; margin-top:4px; }
+  .lobbySub{ font-size:14px; opacity:0.7; margin-bottom:6px; }
+  .lobbyBest{ font-size:13px; background:rgba(255,255,255,0.08); padding:8px 16px; border-radius:20px; margin-bottom:14px; }
+  .lobbyBtns{ display:flex; flex-direction:column; gap:12px; width:100%; max-width:260px; }
+  .lobbyBtn{ width:100%; padding:15px; font-size:16px; }
+
+  /* SETTINGS */
+  #fruitEditGrid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(78px,1fr)); gap:12px; margin-top:14px; padding-bottom:20px; }
+  .fruitEditTile{ display:flex; flex-direction:column; align-items:center; gap:6px; background:rgba(255,255,255,0.06); border-radius:14px; padding:10px 6px; cursor:pointer; border:1px solid rgba(255,255,255,0.1); }
+  .fruitEditTile:active{ transform:scale(0.95); }
+  .fruitEditTile canvas{ border-radius:50%; background:rgba(255,255,255,0.05); }
+  .fruitEditTile span{ font-size:11px; opacity:0.85; }
+
+  /* PAINT MODAL */
+  #paintOverlay{ position:absolute; inset:0; z-index:40; display:none; align-items:center; justify-content:center; background:rgba(6,4,16,0.92); }
+  #paintOverlay.show{ display:flex; }
+  .paintCard{ text-align:center; padding:22px 26px; border-radius:22px; background:linear-gradient(160deg,#2c2450,#1a1530); box-shadow:0 20px 50px rgba(0,0,0,0.5); }
+  #paintCanvas{ background:#fff; border-radius:50%; touch-action:none; margin:12px 0; box-shadow:0 6px 20px rgba(0,0,0,0.4); }
+  #paintPalette{ display:flex; gap:8px; justify-content:center; flex-wrap:wrap; max-width:220px; margin:0 auto 12px; }
+  .paintSwatch{ width:26px; height:26px; border-radius:50%; border:2px solid rgba(255,255,255,0.3); cursor:pointer; }
+  .paintSwatch.on{ border-color:#fff; transform:scale(1.15); }
 </style>
 </head>
 <body>
@@ -116,7 +144,7 @@
 <div id="wrap">
   <div id="topHud">
     <div class="side"><button id="backBtn" style="display:none;">←</button></div>
-    <div id="hudTitle">과일 갤럭시</div>
+    <div id="hudTitle">워터메로니</div>
     <div class="side" style="justify-content:flex-end;">
       <div id="hudStat" style="display:none;"></div>
       <button id="restartBtn" style="display:none;">⟳</button>
@@ -125,9 +153,31 @@
   </div>
 
   <div id="screens">
-    <section id="screen-hub" class="screen active">
+    <section id="screen-lobby" class="screen active">
+      <div class="lobbyWrap">
+        <div class="lobbyFruitDeco">🍉🍊🍋🍇🍑</div>
+        <h1 class="lobbyTitle">워터메로니</h1>
+        <p class="lobbySub">과일을 합쳐라!</p>
+        <div class="lobbyBest">🏆 무한모드 최고 기록: <span id="lobbyBestScore">0</span></div>
+        <div class="lobbyBtns">
+          <button id="lobbyPlayBtn" class="pz-btn lobbyBtn">▶ 플레이</button>
+          <button id="lobbyInfiniteBtn" class="pz-btn secondary lobbyBtn">🌀 무한모드</button>
+          <button id="lobbySettingsBtn" class="pz-btn secondary lobbyBtn">⚙️ 설정</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="screen-settings" class="screen">
       <div class="hubTitle">
-        <h1 id="hubLogo">🍉 과일 갤럭시</h1>
+        <h1>⚙️ 설정</h1>
+        <p>과일을 눌러서 직접 그려보세요</p>
+      </div>
+      <div id="fruitEditGrid"></div>
+    </section>
+
+    <section id="screen-hub" class="screen">
+      <div class="hubTitle">
+        <h1 id="hubLogo">🍉 워터메로니</h1>
         <p>맵을 골라 과일을 합쳐보세요</p>
       </div>
       <div id="worldList"></div>
@@ -163,6 +213,19 @@
       <div class="resultBtns" id="resultBtns"></div>
     </div>
   </div>
+
+  <div id="paintOverlay">
+    <div class="paintCard">
+      <h2 id="paintTitle">체리 그리기</h2>
+      <canvas id="paintCanvas" width="200" height="200"></canvas>
+      <div id="paintPalette"></div>
+      <div class="resultBtns">
+        <button id="paintClearBtn" class="pz-btn secondary">지우기</button>
+        <button id="paintResetBtn" class="pz-btn secondary">기본으로</button>
+        <button id="paintSaveBtn" class="pz-btn">완료</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -179,6 +242,7 @@
     const size = Math.random()*2.2+0.6;
     s.style.width = size+'px';
     s.style.height = size+'px';
+    s.style.background = Math.random()<0.5 ? '#ffe066' : '#ffb37a';
     s.style.left = (Math.random()*100)+'%';
     s.style.top = (Math.random()*100)+'%';
     s.style.animationDelay = (Math.random()*3)+'s';
@@ -222,6 +286,24 @@ function setStars(worldId, idx, stars){
   if(stars > save[worldId][idx]){ save[worldId][idx] = stars; writeSave(); }
 }
 function worldTotalStars(worldId){ return (save[worldId]||[0,0,0,0,0]).reduce((a,b)=>a+b,0); }
+
+/* ================= Custom fruit skins ================= */
+const FRUIT_DEFS = [
+  { r:14, color:'#ff6b6b', hi:'#ffb3b3', score:1, name:'체리' },
+  { r:19, color:'#ffa94d', hi:'#ffd8a8', score:3, name:'귤' },
+  { r:25, color:'#ff922b', hi:'#ffc078', score:6, name:'오렌지' },
+  { r:32, color:'#f9d923', hi:'#fff3bf', score:10, name:'레몬' },
+  { r:40, color:'#82c91e', hi:'#c0eb75', score:15, name:'라임' },
+  { r:49, color:'#ff4d6d', hi:'#ff8fa3', score:21, name:'토마토' },
+  { r:59, color:'#e64980', hi:'#faa2c1', score:28, name:'복숭아' },
+  { r:71, color:'#9c36b5', hi:'#e599f7', score:36, name:'자두' },
+  { r:85, color:'#37b24d', hi:'#8ce99a', score:45, name:'사과' },
+  { r:102,color:'#2f9e44', hi:'#69db7c', score:55, name:'배' },
+  { r:124,color:'#2b8a3e', hi:'#40c057', score:100, name:'수박' },
+];
+function customFruitKey(i){ return 'watermeloni_customFruit_'+i; }
+function getCustomFruitData(i){ return localStorage.getItem(customFruitKey(i)); }
+function setCustomFruitData(i, dataUrl){ if(dataUrl) localStorage.setItem(customFruitKey(i), dataUrl); else localStorage.removeItem(customFruitKey(i)); }
 
 /* ================= World / Stage Definitions ================= */
 const WORLDS = [
@@ -310,13 +392,13 @@ const SECRET_WORLDS = [
       {drops:24, fruitScale:0.58, tripleDrop:true, target:225, label:'훨씬 더 작게'},
       {drops:26, fruitScale:0.5, tripleDrop:true, target:290, label:'🔬 초미니 3연발'},
     ] },
-  { id:'zeroG', name:'무중력 파티', icon:'🌌', color:'#845ef7', desc:'중력이 거의 사라져요! 과일이 둥둥 떠다녀요',
+  { id:'wind', name:'강풍 지대', icon:'🌬️', color:'#66d9e8', desc:'강한 바람이 좌우로 휘몰아쳐서 과일이 계속 밀려요',
     stages:[
-      {drops:26, zeroGravity:true, target:80, label:'약한 중력'},
-      {drops:28, zeroGravity:true, target:115, label:'점점 더 둥실둥실'},
-      {drops:30, zeroGravity:true, target:150, label:'거의 무중력'},
-      {drops:32, zeroGravity:true, target:190, label:'완전 무중력'},
-      {drops:36, zeroGravity:true, target:240, label:'🌌 무중력 카오스'},
+      {drops:28, windForce:420, target:80, label:'산들바람'},
+      {drops:28, windForce:620, target:115, label:'조금 더 세게'},
+      {drops:30, windForce:820, target:150, label:'강풍'},
+      {drops:32, windForce:1050, target:190, label:'폭풍'},
+      {drops:36, windForce:1300, target:240, label:'🌬️ 태풍급 강풍'},
     ] },
 ];
 
@@ -343,32 +425,47 @@ function isStageUnlocked(list, wi, si){
 }
 
 /* ================= App / Navigation ================= */
-const screens = { hub: byId('screen-hub'), secretHub: byId('screen-secret-hub'), stages: byId('screen-stages'), play: byId('screen-play') };
+const screens = { lobby: byId('screen-lobby'), settings: byId('screen-settings'), hub: byId('screen-hub'), secretHub: byId('screen-secret-hub'), stages: byId('screen-stages'), play: byId('screen-play') };
 function byId(id){ return document.getElementById(id); }
 const backBtn = byId('backBtn'), restartBtn = byId('restartBtn'), hudTitle = byId('hudTitle'), hudStat = byId('hudStat');
 const resultOverlay = byId('resultOverlay');
 
-let nav = ['hub'];
+let nav = ['lobby'];
 let currentList = WORLDS;
 let currentWorldIdx = 0, currentStageIdx = 0;
 let activeGame = null; // {destroy, restart}
+let inInfiniteMode = false;
 
 function showScreen(name){
   Object.keys(screens).forEach(k=> screens[k].classList.toggle('active', k===name));
-  backBtn.style.display = name==='hub' ? 'none' : 'flex';
+  backBtn.style.display = name==='lobby' ? 'none' : 'flex';
   restartBtn.style.display = name==='play' ? 'flex' : 'none';
   hudStat.style.display = name==='play' ? 'inline-block' : 'none';
 }
 
-function goHub(){
-  nav = ['hub'];
+function goLobby(){
+  nav = ['lobby'];
   destroyActiveGame();
-  hudTitle.textContent = '과일 갤럭시';
+  hudTitle.textContent = '워터메로니';
+  byId('lobbyBestScore').textContent = getInfiniteBest();
+  showScreen('lobby');
+}
+function goSettings(){
+  nav = ['lobby','settings'];
+  destroyActiveGame();
+  hudTitle.textContent = '⚙️ 설정';
+  renderFruitEditGrid();
+  showScreen('settings');
+}
+function goHub(){
+  nav = ['lobby','hub'];
+  destroyActiveGame();
+  hudTitle.textContent = '워터메로니';
   renderHub();
   showScreen('hub');
 }
 function goSecretHub(){
-  nav = ['hub','secretHub'];
+  nav = ['lobby','hub','secretHub'];
   destroyActiveGame();
   hudTitle.textContent = '🌌 비밀의 방';
   renderSecretHub();
@@ -376,7 +473,7 @@ function goSecretHub(){
 }
 function goStages(list, wi){
   currentList = list;
-  nav = list===SECRET_WORLDS ? ['hub','secretHub','stages'] : ['hub','stages'];
+  nav = list===SECRET_WORLDS ? ['lobby','hub','secretHub','stages'] : ['lobby','hub','stages'];
   destroyActiveGame();
   currentWorldIdx = wi;
   const w = list[wi];
@@ -388,7 +485,8 @@ function goStages(list, wi){
 }
 function goPlay(list, wi, si){
   currentList = list;
-  nav = (list===SECRET_WORLDS ? ['hub','secretHub','stages','play'] : ['hub','stages','play']);
+  inInfiniteMode = false;
+  nav = (list===SECRET_WORLDS ? ['lobby','hub','secretHub','stages','play'] : ['lobby','hub','stages','play']);
   currentWorldIdx = wi; currentStageIdx = si;
   const w = list[wi];
   hudTitle.textContent = w.icon+' '+w.name+' · '+(si+1)+'단계';
@@ -399,11 +497,16 @@ backBtn.addEventListener('click', function(){
   if(nav.length<=1){ return; }
   nav.pop();
   const target = nav[nav.length-1];
-  if(target==='hub') goHub();
+  if(target==='lobby') goLobby();
+  else if(target==='settings') goSettings();
+  else if(target==='hub') goHub();
   else if(target==='secretHub') goSecretHub();
   else if(target==='stages') goStages(currentList, currentWorldIdx);
 });
-restartBtn.addEventListener('click', function(){ ensureAudio(); launchStage(currentList, currentWorldIdx, currentStageIdx); });
+restartBtn.addEventListener('click', function(){
+  ensureAudio();
+  if(inInfiniteMode) startInfinite(); else launchStage(currentList, currentWorldIdx, currentStageIdx);
+});
 
 function destroyActiveGame(){
   if(activeGame && activeGame.destroy){ try{ activeGame.destroy(); }catch(e){} }
@@ -506,6 +609,105 @@ function renderStages(list, wi){
     map.appendChild(nodeWrap);
   }
 }
+
+/* ---------- Settings: custom fruit editor ---------- */
+function renderFruitEditGrid(){
+  const grid = byId('fruitEditGrid');
+  grid.innerHTML = '';
+  FRUIT_DEFS.forEach((f, i)=>{
+    const tile = document.createElement('div');
+    tile.className = 'fruitEditTile';
+    const canvas = document.createElement('canvas');
+    canvas.width=56; canvas.height=56;
+    const cx = canvas.getContext('2d');
+    const data = getCustomFruitData(i);
+    if(data){
+      const img = new Image();
+      img.onload = function(){
+        cx.clearRect(0,0,56,56);
+        cx.save(); cx.beginPath(); cx.arc(28,28,26,0,Math.PI*2); cx.clip();
+        cx.drawImage(img,0,0,56,56); cx.restore();
+      };
+      img.src = data;
+    } else {
+      const grad = cx.createRadialGradient(18,18,4,28,28,26);
+      grad.addColorStop(0,f.hi); grad.addColorStop(1,f.color);
+      cx.beginPath(); cx.arc(28,28,26,0,Math.PI*2); cx.fillStyle=grad; cx.fill();
+    }
+    const label = document.createElement('span');
+    label.textContent = f.name;
+    tile.appendChild(canvas); tile.appendChild(label);
+    tile.addEventListener('click', function(){ sfxClick(); ensureAudio(); openPaintEditor(i); });
+    grid.appendChild(tile);
+  });
+}
+const PAINT_COLORS = ['#ff6b6b','#ffa94d','#ffd43b','#82c91e','#4dabf7','#845ef7','#e64980','#495057','#ffffff','#2b2450'];
+let paintTierIndex = 0, paintColor = '#ff6b6b';
+function buildPaintPalette(){
+  const wrap = byId('paintPalette');
+  wrap.innerHTML = '';
+  PAINT_COLORS.forEach(c=>{
+    const sw = document.createElement('div');
+    sw.className = 'paintSwatch' + (c===paintColor?' on':'');
+    sw.style.background = c;
+    sw.addEventListener('click', function(){ paintColor=c; buildPaintPalette(); });
+    wrap.appendChild(sw);
+  });
+}
+const paintCanvas = byId('paintCanvas');
+const paintCtx = paintCanvas.getContext('2d');
+let painting=false, lastPaintPt=null;
+function paintCanvasPos(e){
+  const rect = paintCanvas.getBoundingClientRect();
+  let clientX,clientY;
+  if(e.touches && e.touches.length){ clientX=e.touches[0].clientX; clientY=e.touches[0].clientY; }
+  else if(e.changedTouches && e.changedTouches.length){ clientX=e.changedTouches[0].clientX; clientY=e.changedTouches[0].clientY; }
+  else { clientX=e.clientX; clientY=e.clientY; }
+  return [ (clientX-rect.left)*(paintCanvas.width/rect.width), (clientY-rect.top)*(paintCanvas.height/rect.height) ];
+}
+function paintDot(x,y){ paintCtx.fillStyle=paintColor; paintCtx.beginPath(); paintCtx.arc(x,y,7,0,Math.PI*2); paintCtx.fill(); }
+function paintLine(x1,y1,x2,y2){ paintCtx.strokeStyle=paintColor; paintCtx.lineWidth=14; paintCtx.lineCap='round'; paintCtx.beginPath(); paintCtx.moveTo(x1,y1); paintCtx.lineTo(x2,y2); paintCtx.stroke(); }
+function paintDown(e){ ensureAudio(); painting=true; const p=paintCanvasPos(e); lastPaintPt=p; paintDot(p[0],p[1]); e.preventDefault(); }
+function paintMove(e){ if(!painting) return; const p=paintCanvasPos(e); paintLine(lastPaintPt[0],lastPaintPt[1],p[0],p[1]); lastPaintPt=p; e.preventDefault(); }
+function paintUp(){ painting=false; }
+paintCanvas.addEventListener('mousedown', paintDown);
+paintCanvas.addEventListener('mousemove', paintMove);
+window.addEventListener('mouseup', paintUp);
+paintCanvas.addEventListener('touchstart', paintDown, {passive:false});
+paintCanvas.addEventListener('touchmove', paintMove, {passive:false});
+paintCanvas.addEventListener('touchend', paintUp);
+function openPaintEditor(i){
+  paintTierIndex = i;
+  const f = FRUIT_DEFS[i];
+  byId('paintTitle').textContent = f.name+' 그리기';
+  paintCtx.clearRect(0,0,200,200);
+  const data = getCustomFruitData(i);
+  if(data){
+    const img = new Image();
+    img.onload = function(){ paintCtx.drawImage(img,0,0,200,200); };
+    img.src = data;
+  } else {
+    const grad = paintCtx.createRadialGradient(70,70,10,100,100,95);
+    grad.addColorStop(0,f.hi); grad.addColorStop(1,f.color);
+    paintCtx.beginPath(); paintCtx.arc(100,100,95,0,Math.PI*2); paintCtx.fillStyle=grad; paintCtx.fill();
+  }
+  buildPaintPalette();
+  byId('paintOverlay').classList.add('show');
+}
+byId('paintClearBtn').addEventListener('click', function(){ sfxClick(); paintCtx.clearRect(0,0,200,200); });
+byId('paintResetBtn').addEventListener('click', function(){
+  sfxClick();
+  setCustomFruitData(paintTierIndex, null);
+  byId('paintOverlay').classList.remove('show');
+  renderFruitEditGrid();
+});
+byId('paintSaveBtn').addEventListener('click', function(){
+  sfxGood();
+  const dataUrl = paintCanvas.toDataURL('image/png');
+  setCustomFruitData(paintTierIndex, dataUrl);
+  byId('paintOverlay').classList.remove('show');
+  renderFruitEditGrid();
+});
 
 /* ---------- Dev cheat code: unlock everything ---------- */
 function showCheatToast(){
@@ -611,6 +813,54 @@ function launchStage(list, wi, si){
   activeGame = mountMerge(area, Object.assign({mapId:w.id}, cfg), cb);
 }
 
+/* ---------- Infinite mode ---------- */
+const INF_BEST_KEY = 'watermeloni_infinite_best';
+function getInfiniteBest(){ return parseInt(localStorage.getItem(INF_BEST_KEY)||'0', 10); }
+function setInfiniteBest(v){ localStorage.setItem(INF_BEST_KEY, String(v)); }
+function startInfinite(){
+  inInfiniteMode = true;
+  nav = ['lobby','play'];
+  currentList = null;
+  destroyActiveGame();
+  hudTitle.textContent = '🌀 무한모드';
+  showScreen('play');
+  const area = byId('playArea');
+  const goalEl = byId('playGoal');
+  const best = getInfiniteBest();
+  const cb = {
+    setHud: function(text){ hudStat.textContent = text; },
+    setGoal: function(text){ goalEl.textContent = text; },
+    onWin: function(){},
+    onInfiniteEnd: function(finalScore){
+      const prevBest = getInfiniteBest();
+      const isNew = finalScore > prevBest;
+      if(isNew) setInfiniteBest(finalScore);
+      sfxLose();
+      showInfiniteResult(finalScore, isNew ? finalScore : prevBest, isNew);
+    }
+  };
+  activeGame = mountMerge(area, { mapId:'infinite', infinite:true, drops:Infinity, best }, cb);
+}
+function showInfiniteResult(finalScore, best, isNew){
+  byId('resultTitle').textContent = isNew ? '🏆 신기록!' : '💥 게임 종료';
+  const starsWrap = byId('resultStars');
+  starsWrap.innerHTML = '<span style="font-size:20px; letter-spacing:0;">점수 '+finalScore+'점 · 최고 '+best+'점</span>';
+  byId('resultSub').textContent = isNew ? '새로운 최고 기록을 세웠어요!' : '';
+  const btns = byId('resultBtns');
+  btns.innerHTML = '';
+  const retry = document.createElement('button');
+  retry.className = 'pz-btn secondary';
+  retry.textContent = '다시 하기';
+  retry.addEventListener('click', function(){ hideResult(); startInfinite(); });
+  btns.appendChild(retry);
+  const lobbyBtn = document.createElement('button');
+  lobbyBtn.className = 'pz-btn';
+  lobbyBtn.textContent = '로비로';
+  lobbyBtn.addEventListener('click', function(){ hideResult(); goLobby(); });
+  btns.appendChild(lobbyBtn);
+  resultOverlay.classList.add('show');
+}
+
 /* =========================================================================
    GAME 1: MERGE (fruit)
    ========================================================================= */
@@ -641,19 +891,7 @@ function measureEmojiShape(emoji){
   return result;
 }
 function mountMerge(area, cfg, cb){
-  const FRUITS = [
-    { r:14, color:'#ff6b6b', hi:'#ffb3b3', score:1, name:'체리' },
-    { r:19, color:'#ffa94d', hi:'#ffd8a8', score:3, name:'귤' },
-    { r:25, color:'#ff922b', hi:'#ffc078', score:6, name:'오렌지' },
-    { r:32, color:'#f9d923', hi:'#fff3bf', score:10, name:'레몬' },
-    { r:40, color:'#82c91e', hi:'#c0eb75', score:15, name:'라임' },
-    { r:49, color:'#ff4d6d', hi:'#ff8fa3', score:21, name:'토마토' },
-    { r:59, color:'#e64980', hi:'#faa2c1', score:28, name:'복숭아' },
-    { r:71, color:'#9c36b5', hi:'#e599f7', score:36, name:'자두' },
-    { r:85, color:'#37b24d', hi:'#8ce99a', score:45, name:'사과' },
-    { r:102,color:'#2f9e44', hi:'#69db7c', score:55, name:'배' },
-    { r:124,color:'#2b8a3e', hi:'#40c057', score:100, name:'수박' },
-  ];
+  const FRUITS = FRUIT_DEFS;
   const ANIMALS = [
     { r:18, color:'#fff3bf', hi:'#fff9db', score:2, emoji:'🐥', weight:0.6, name:'병아리' },
     { r:28, color:'#ffe066', hi:'#fff3bf', score:6, emoji:'🐓', weight:0.85, name:'닭' },
@@ -663,9 +901,17 @@ function mountMerge(area, cfg, cb){
     { r:90, color:'#adb5bd', hi:'#ced4da', score:150, emoji:'🐘', weight:2.0, name:'코끼리' },
     { r:114,color:'#8d6e5c', hi:'#a98b74', score:300, emoji:'🦣', weight:2.4, name:'매머드' },
   ];
-  const scaleMul = cfg.animal ? (cfg.animalScale||1) : (cfg.fruitScale||1);
+  const BASE_SCALE = 1.35;
+  const scaleMul = BASE_SCALE * (cfg.animal ? (cfg.animalScale||1) : (cfg.fruitScale||1));
   const baseSkin = cfg.animal ? ANIMALS : FRUITS;
   const SKIN = scaleMul!==1 ? baseSkin.map(f=>Object.assign({}, f, {r:f.r*scaleMul})) : baseSkin;
+  const customImages = {};
+  if(!cfg.animal){
+    FRUIT_DEFS.forEach((f,i)=>{
+      const data = getCustomFruitData(i);
+      if(data){ const img=new Image(); img.src=data; customImages[i]=img; }
+    });
+  }
   const BOMB_R = 30;
   const BOMB_COLORS = { score:'#ff922b', dud:'#868e96', shock:'#ff6b6b', nuke:'#ff0000' };
   const canvas = document.createElement('canvas');
@@ -680,16 +926,15 @@ function mountMerge(area, cfg, cb){
     canvas.width=Math.floor(W*DPR); canvas.height=Math.floor(H*DPR);
     ctx.setTransform(DPR,0,0,DPR,0,0);
     simW=W; simH=H;
-    DANGER_Y = simH*0.06;
+    DANGER_Y = simH*0.14;
   }
   let DANGER_Y=0;
-  const noSettle = !!(cfg.zeroGravity);
+  const noSettle = false;
   const GRAVITY=1400, DAMPING=0.985, WALL_R=0.28, FLOOR_R=0.22, FRUIT_R=0.12;
-  const gravityMul = cfg.zeroGravity ? 0.06 : 1;
-  let bodies=[], idc=1, score=0, dropsLeft=cfg.drops, dangerTimer=0, ended=false, maxTierEver=0;
+  let bodies=[], idc=1, score=0, dropsLeft=cfg.drops, dangerTimer=0, dangerBeepTimer=0.5, ended=false, maxTierEver=0;
   let dropX=0, currentIndex=0, nextIndex=0, currentBombType=null, nextBombType=null, canDrop=true, aiming=false;
   let particles=[], floatTexts=[], shake=0;
-  let obstacleAngle=0, totalT=0, exhaustTimer=0;
+  let obstacleAngle=0, totalT=0, exhaustTimer=0, windPhase=Math.random()*10, nukeFlash=0, shockRings=[];
   let meteors=[], meteorTimer = cfg.meteorPeriod ? cfg.meteorPeriod*0.6 : Infinity;
   let crusherPhase = cfg.crusherCount ? Array.from({length:cfg.crusherCount},(_,i)=>i*(Math.PI/cfg.crusherCount)) : [];
   let laserPhase = cfg.laserCount ? Array.from({length:cfg.laserCount},(_,i)=>i*(Math.PI/Math.max(1,cfg.laserCount))) : [];
@@ -726,8 +971,16 @@ function mountMerge(area, cfg, cb){
     if(r<w0+w1+w2) return 2;
     return 3;
   }
-  function drawFruit(x,y,rx,ry,index,alpha,bombType,fusing,rot){
+  function drawFruit(x,y,rx,ry,index,alpha,bombType,fusing,rot,danger){
     ctx.save(); ctx.globalAlpha = alpha===undefined?1:alpha;
+    if(danger){
+      const pulse = 0.5+0.5*Math.sin(totalT*14);
+      ctx.save();
+      ctx.globalAlpha = (alpha===undefined?1:alpha) * (0.4+0.4*pulse);
+      ctx.fillStyle = '#ff0000';
+      ctx.beginPath(); ctx.ellipse(x,y,rx*1.15,ry*1.15,0,0,Math.PI*2); ctx.fill();
+      ctx.restore();
+    }
     if(index===-1){
       let ringColor = BOMB_COLORS[bombType||'score'];
       if(fusing || bombType==='nuke'){ ringColor = (Math.floor(totalT*10)%2===0) ? '#ffffff' : '#ff0000'; }
@@ -741,7 +994,14 @@ function mountMerge(area, cfg, cb){
       return;
     }
     const f=SKIN[index];
-    if(f.emoji){
+    const img = customImages[index];
+    if(img && img.complete && img.naturalWidth>0){
+      ctx.save();
+      ctx.translate(x,y); ctx.rotate(rot||0);
+      ctx.beginPath(); ctx.ellipse(0,0,rx,ry,0,0,Math.PI*2); ctx.clip();
+      ctx.drawImage(img, -rx, -ry, rx*2, ry*2);
+      ctx.restore();
+    } else if(f.emoji){
       ctx.translate(x,y); ctx.rotate(rot||0);
       ctx.font=(Math.max(rx,ry)*1.7)+'px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
       ctx.shadowColor='rgba(0,0,0,0.4)'; ctx.shadowBlur=Math.max(rx,ry)*0.15;
@@ -756,7 +1016,9 @@ function mountMerge(area, cfg, cb){
     ctx.restore();
   }
   function updateHud(){
-    if(cfg.goal==='tier'){
+    if(cfg.infinite){
+      cb.setHud('점수 '+score+' · 최고 '+Math.max(score, cfg.best||0));
+    } else if(cfg.goal==='tier'){
       const cur = maxTierEver>0 ? SKIN[maxTierEver].name : '-';
       cb.setHud('현재 '+cur+' · 남은 드롭 '+dropsLeft);
     } else {
@@ -764,7 +1026,9 @@ function mountMerge(area, cfg, cb){
     }
   }
   (function(){
-    let goalMsg = cfg.goal==='tier'
+    let goalMsg = cfg.infinite
+      ? '가능한 오래 살아남아 최고 점수를 노려보세요!'
+      : cfg.goal==='tier'
       ? (SKIN[cfg.tierTarget].name+' 만들기 · 드롭 '+cfg.drops+'회 이내')
       : ('목표 점수 '+cfg.target+'점 · 드롭 '+cfg.drops+'회 이내');
     const extras=[];
@@ -778,7 +1042,7 @@ function mountMerge(area, cfg, cb){
     if(cfg.fruitScale && cfg.fruitScale<1) extras.push('🔬 과일이 훨씬 작아요');
     if(cfg.tripleDrop) extras.push('🍇 한 번에 3개씩 떨어져요');
     if(cfg.meteorPeriod) extras.push(cfg.meteorDestroy ? '☄️ 운석이 과일을 파괴해요' : '☄️ 하늘에서 운석이 떨어져요');
-    if(cfg.zeroGravity) extras.push('🌌 무중력! 과일이 둥둥 떠다녀요');
+    if(cfg.windForce) extras.push('🌬️ 강풍이 과일을 계속 밀어요');
     if(extras.length) goalMsg += ' — ' + extras.join(' · ');
     cb.setGoal(goalMsg);
   })();
@@ -973,11 +1237,14 @@ function mountMerge(area, cfg, cb){
       }
       score += Math.round(bonus)+20;
       addFloat(bomb.x, bomb.y-BOMB_R-10, '☢️ NUKE! +'+(Math.round(bonus)+20), '#ff0000');
-      beep(50,0.5,'sawtooth',0.28); beep(35,0.6,'sawtooth',0.22,0.1);
-      shake = Math.max(shake, 26);
+      beep(45,0.6,'sawtooth',0.3); beep(30,0.7,'sawtooth',0.24,0.12); beep(900,0.15,'square',0.15,0.02);
+      shake = Math.max(shake, 30);
+      nukeFlash = 1;
+      shockRings.push({x:bomb.x,y:bomb.y,r:BOMB_R,age:0});
       updateHud();
       if(cfg.goal!=='tier' && score>=cfg.target && !ended) endWin();
-      spawnParticles(bomb.x,bomb.y,'#ff0000',36,2.2);
+      spawnParticles(bomb.x,bomb.y,'#ff0000',40,2.6);
+      spawnParticles(bomb.x,bomb.y,'#ffe066',24,2.0);
       return;
     }
     if(!silent){
@@ -1022,7 +1289,9 @@ function mountMerge(area, cfg, cb){
       const a=bodies[i]; if(a.merging||a.isBomb) continue;
       for(let j=i+1;j<bodies.length;j++){
         const b=bodies[j]; if(b.merging||b.isBomb) continue;
-        const dx=b.x-a.x, dy=b.y-a.y, dist=Math.hypot(dx,dy)||0.001;
+        let dx=b.x-a.x; const dy=b.y-a.y;
+        if(Math.abs(dx)<1.2 && Math.abs(dy)<(a.ry+b.ry)) dx += (a.id%2===0?1:-1)*1.2;
+        const dist=Math.hypot(dx,dy)||0.001;
         const angle=Math.atan2(dy,dx);
         const ea=effRadius(a,angle), eb=effRadius(b,angle), minDist=ea+eb;
         if(dist<minDist){
@@ -1047,11 +1316,12 @@ function mountMerge(area, cfg, cb){
         b.fuseTimer -= dt;
         if(b.fuseTimer<=0){ detonate(b, true); continue; }
       }
-      b.vy+=GRAVITY*gravityMul*(b.weight||1)*dt; b.x+=b.vx*dt; b.y+=b.vy*dt; b.vx*=DAMPING; b.vy*=DAMPING;
+      b.vy+=GRAVITY*(b.weight||1)*dt;
+      if(cfg.windForce) b.vx += Math.sin(totalT*0.9+windPhase)*cfg.windForce*dt;
+      b.x+=b.vx*dt; b.y+=b.vy*dt; b.vx*=DAMPING; b.vy*=DAMPING;
       if(b.x-b.rx<0){ b.x=b.rx; b.vx=-b.vx*WALL_R; kick(b,1); }
       if(b.x+b.rx>simW){ b.x=simW-b.rx; b.vx=-b.vx*WALL_R; kick(b,-1); }
       if(b.y+b.ry>simH){ b.y=simH-b.ry; b.vy=-b.vy*FLOOR_R; if(Math.abs(b.vy)<20) b.vy=0; }
-      if(cfg.zeroGravity && b.y-b.ry<0){ b.y=b.ry; b.vy=-b.vy*WALL_R; }
       if(cfg.obstacleCount) resolveObstacle(b);
       if(cfg.crusherCount) resolveCrushers(b);
       if(cfg.laserCount) resolveLasers(b, dt);
@@ -1060,7 +1330,9 @@ function mountMerge(area, cfg, cb){
       const a=bodies[i]; if(a.merging) continue;
       for(let j=i+1;j<bodies.length;j++){
         const b=bodies[j]; if(b.merging) continue;
-        const dx=b.x-a.x, dy=b.y-a.y, dist=Math.hypot(dx,dy)||0.001;
+        let dx=b.x-a.x; const dy=b.y-a.y;
+        if(Math.abs(dx)<1.2 && Math.abs(dy)<(a.ry+b.ry) && a.index!==b.index) dx += (a.id%2===0?1:-1)*1.2;
+        const dist=Math.hypot(dx,dy)||0.001;
         const angle=Math.atan2(dy,dx);
         const minDist = effRadius(a,angle)+effRadius(b,angle);
         if(dist<minDist){
@@ -1111,12 +1383,31 @@ function mountMerge(area, cfg, cb){
     for(const t of floatTexts) t.age+=dt;
     floatTexts=floatTexts.filter(t=>t.age<t.life);
     if(shake>0) shake=Math.max(0,shake-dt*30);
+    if(nukeFlash>0) nukeFlash=Math.max(0,nukeFlash-dt*1.8);
+    if(shockRings.length){
+      for(const r of shockRings){ r.r += dt*820; r.age += dt; }
+      shockRings = shockRings.filter(r=>r.age<0.7);
+    }
 
     if(!noSettle){
       let inDanger=false;
-      for(const b of bodies){ if(b.y-b.ry<DANGER_Y && Math.abs(b.vy)<90 && b.spawnT>0.6){ inDanger=true; break; } }
-      if(inDanger){ dangerTimer+=dt; if(dangerTimer>3.2 && !ended) endLose('과일이 너무 높이 쌓였어요!'); }
-      else dangerTimer=Math.max(0,dangerTimer-dt*2);
+      for(const b of bodies){
+        if(b.merging) continue;
+        b.inDanger = (b.y-b.ry<DANGER_Y && b.spawnT>0.5);
+        if(b.inDanger) inDanger=true;
+      }
+      if(inDanger){
+        dangerTimer+=dt;
+        dangerBeepTimer -= dt;
+        if(dangerBeepTimer<=0){
+          beep(880,0.09,'square',0.16);
+          dangerBeepTimer = Math.max(0.15, 0.5 - dangerTimer*0.08);
+        }
+        if(dangerTimer>2.6 && !ended) explodeAndLose();
+      } else {
+        dangerTimer=Math.max(0,dangerTimer-dt*2);
+        dangerBeepTimer = 0.5;
+      }
     }
 
     const goalMet = cfg.goal==='tier' ? maxTierEver>=cfg.tierTarget : score>=cfg.target;
@@ -1137,7 +1428,23 @@ function mountMerge(area, cfg, cb){
     const sub = cfg.goal==='tier' ? (SKIN[cfg.tierTarget].name+' 완성!') : ('최종 점수 '+score+'점');
     setTimeout(()=>cb.onWin(stars,sub), 400);
   }
-  function endLose(msg){ ended=true; setTimeout(()=>cb.onLose(msg), 300); }
+  function endLose(msg){
+    ended=true;
+    if(cfg.infinite){ setTimeout(()=>cb.onInfiniteEnd(score), 300); }
+    else { setTimeout(()=>cb.onLose(msg), 300); }
+  }
+  function explodeAndLose(){
+    ended=true;
+    for(const b of bodies){
+      spawnParticles(b.x, b.y, b.isBomb?'#ff6b6b':(SKIN[b.index]?SKIN[b.index].color:'#ff6b6b'), 10, 1.6);
+      b.merging=true;
+    }
+    bodies=[];
+    shake=Math.max(shake, 24);
+    beep(60,0.5,'sawtooth',0.26); beep(45,0.6,'sawtooth',0.2,0.12);
+    if(cfg.infinite){ setTimeout(()=>cb.onInfiniteEnd(score), 500); }
+    else { setTimeout(()=>cb.onLose('과일이 너무 높이 쌓였어요!'), 500); }
+  }
 
   function render(){
     ctx.clearRect(0,0,W,H);
@@ -1195,7 +1502,15 @@ function mountMerge(area, cfg, cb){
     }
     for(const b of bodies){
       const scale=(b.drawScale||1);
-      drawFruit(b.x,b.y,b.rx*scale,b.ry*scale,b.index,undefined,b.bombType,b.fusing,b.rot);
+      drawFruit(b.x,b.y,b.rx*scale,b.ry*scale,b.index,undefined,b.bombType,b.fusing,b.rot,b.inDanger);
+    }
+    for(const r of shockRings){
+      const a = Math.max(0, 1-r.age/0.7);
+      ctx.save(); ctx.globalAlpha=a; ctx.lineWidth=Math.max(2,10*(1-r.age)); ctx.strokeStyle='#ffe066';
+      ctx.beginPath(); ctx.arc(r.x,r.y,r.r,0,Math.PI*2); ctx.stroke();
+      ctx.globalAlpha=a*0.6; ctx.lineWidth=Math.max(1,20*(1-r.age)); ctx.strokeStyle='#ff0000';
+      ctx.beginPath(); ctx.arc(r.x,r.y,r.r*0.85,0,Math.PI*2); ctx.stroke();
+      ctx.restore();
     }
     for(const p of particles){
       const a=1-p.age/p.life; ctx.save(); ctx.globalAlpha=Math.max(0,a); ctx.fillStyle=p.color;
@@ -1211,6 +1526,24 @@ function mountMerge(area, cfg, cb){
       ctx.save(); ctx.globalAlpha=0.9; ctx.setLineDash([4,6]); ctx.strokeStyle='rgba(255,255,255,0.25)';
       ctx.beginPath(); ctx.moveTo(dropX,ry*2+8); ctx.lineTo(dropX,simH); ctx.stroke(); ctx.restore();
       drawFruit(dropX,ry+4,rx,ry,currentIndex,canDrop?1:0.5,currentBombType,false,0);
+      if(nextIndex!==-1){
+        const nf = SKIN[nextIndex];
+        const nr = Math.min(16, nf.r*0.55);
+        const nbx = simW-30, nby = 30;
+        ctx.save();
+        ctx.fillStyle='rgba(20,12,6,0.55)';
+        ctx.beginPath(); ctx.arc(nbx,nby,23,0,Math.PI*2); ctx.fill();
+        ctx.lineWidth=2; ctx.strokeStyle='rgba(255,255,255,0.4)'; ctx.stroke();
+        ctx.font='bold 9px sans-serif'; ctx.textAlign='center'; ctx.fillStyle='#ffe066';
+        ctx.fillText('NEXT', nbx, nby-15);
+        ctx.restore();
+        drawFruit(nbx,nby+3,nr,nr,nextIndex,1,nextBombType,false,0);
+      }
+    }
+    if(nukeFlash>0){
+      ctx.save(); ctx.globalAlpha=nukeFlash*0.85; ctx.fillStyle='#fff';
+      ctx.fillRect(-40,-40,simW+80,simH+80);
+      ctx.restore();
     }
     ctx.restore();
   }
@@ -1240,8 +1573,12 @@ function mountMerge(area, cfg, cb){
 
 
 /* ================= Init ================= */
+byId('lobbyPlayBtn').addEventListener('click', function(){ sfxClick(); ensureAudio(); goHub(); });
+byId('lobbyInfiniteBtn').addEventListener('click', function(){ sfxClick(); ensureAudio(); startInfinite(); });
+byId('lobbySettingsBtn').addEventListener('click', function(){ sfxClick(); ensureAudio(); goSettings(); });
+byId('lobbyBestScore').textContent = getInfiniteBest();
 renderHub();
-showScreen('hub');
+showScreen('lobby');
 
 })();
 </script>
