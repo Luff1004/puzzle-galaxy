@@ -1011,12 +1011,20 @@ function mountMerge(area, cfg, cb){
     }
     const f=SKIN[index];
     let img = customImages[index];
-    if(!img && f.img && f.img.complete && f.img.naturalWidth>0) img = f.img;
+    let needsClip = !!img;
+    if(!img && f.img && f.img.complete && f.img.naturalWidth>0){ img = f.img; needsClip = false; }
     if(img && img.complete && img.naturalWidth>0){
       ctx.save();
       ctx.translate(x,y); ctx.rotate(rot||0);
-      ctx.beginPath(); ctx.ellipse(0,0,rx,ry,0,0,Math.PI*2); ctx.clip();
-      ctx.drawImage(img, -rx, -ry, rx*2, ry*2);
+      if(needsClip){
+        ctx.beginPath(); ctx.ellipse(0,0,rx,ry,0,0,Math.PI*2); ctx.clip();
+        ctx.drawImage(img, -rx, -ry, rx*2, ry*2);
+      } else {
+        const iw = img.naturalWidth, ih = img.naturalHeight;
+        const drawScale = Math.min((rx*2)/iw, (ry*2)/ih);
+        const dw = iw*drawScale, dh = ih*drawScale;
+        ctx.drawImage(img, -dw/2, -dh/2, dw, dh);
+      }
       ctx.restore();
     } else if(f.emoji){
       ctx.translate(x,y); ctx.rotate(rot||0);
