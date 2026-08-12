@@ -40,6 +40,7 @@
     cursor:pointer; transition: transform 0.12s;
   }
   .worldCard:active{ transform:scale(0.97); }
+  .worldCard.secretCard{ border:1px solid rgba(132,94,247,0.6); box-shadow:0 8px 24px rgba(0,0,0,0.35), 0 0 20px rgba(132,94,247,0.35); }
   .worldCard.locked{ opacity:0.45; filter:grayscale(0.6); }
   .planetIcon{
     width:56px; height:56px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:28px;
@@ -248,26 +249,42 @@ const WORLDS = [
       {drops:28, animal:true, goal:'tier', tierTarget:4, label:'소까지!'},
       {drops:28, animal:true, goal:'tier', tierTarget:6, label:'🦣 매머드 완성!'},
     ] },
-  { id:'gravity', name:'중력 미로', icon:'🧭', color:'#63e6be', desc:'중력 방향이 게임 중에 계속 바뀌어요! 표지판을 잘 보세요',
+  { id:'crusher', name:'압착기 (장애물 V2)', icon:'🔨', color:'#e8590c', desc:'천장에서 압착기가 쿵쿵 내려와요! 갈수록 빠르고 많아져요',
     stages:[
-      {drops:28, target:45, gravityDir:'down', gravitySwitch:true, gravitySwitchPeriod:8, label:'⬇️ 천천히 전환'},
-      {drops:30, target:70, gravityDir:'right', gravitySwitch:true, gravitySwitchPeriod:7, label:'➡️ 조금 더 빠르게'},
-      {drops:30, target:90, gravityDir:'left', gravitySwitch:true, gravitySwitchPeriod:6, label:'⬅️ 빠른 전환'},
-      {drops:32, target:115, gravityDir:'up', gravitySwitch:true, gravitySwitchPeriod:5, label:'⬆️ 더 빠르게!'},
-      {drops:36, target:150, gravityDir:'spin', label:'🌪️ 빙글빙글 중력'},
+      {drops:28, target:55, crusherCount:1, crusherSpeed:1.2, crusherAmplitude:0.32, label:'압착기 1개'},
+      {drops:28, target:85, crusherCount:1, crusherSpeed:1.6, crusherAmplitude:0.4, label:'더 빠르게'},
+      {drops:30, target:115, crusherCount:2, crusherSpeed:1.5, crusherAmplitude:0.42, label:'압착기 2개'},
+      {drops:30, target:150, crusherCount:2, crusherSpeed:1.9, crusherAmplitude:0.46, label:'더 세게 쿵쿵'},
+      {drops:32, target:195, crusherCount:3, crusherSpeed:1.9, crusherAmplitude:0.5, label:'🔨 압착기 3연타'},
     ] },
-  { id:'meteor', name:'운석 낙하', icon:'☄️', color:'#ff922b', desc:'하늘에서 운석이 떨어져요! 충격으로 과일이 와르르 쏟아져요',
+  { id:'laser', name:'레이저 그물 (장애물 V3)', icon:'⚡', color:'#63e6be', desc:'레이저가 좌우로 훑고 지나가요! 닿으면 튕겨나가요',
     stages:[
-      {drops:28, target:55, meteorPeriod:6.5, label:'가끔 떨어지는 운석'},
-      {drops:30, target:85, meteorPeriod:5.4, label:'더 자주 떨어짐'},
-      {drops:30, target:115, meteorPeriod:4.4, label:'운석비'},
-      {drops:32, target:150, meteorPeriod:3.6, label:'거센 운석비'},
-      {drops:34, target:195, meteorPeriod:2.8, label:'☄️ 운석 폭풍'},
+      {drops:28, target:55, laserCount:1, laserSpeed:1.0, label:'레이저 1줄'},
+      {drops:28, target:85, laserCount:1, laserSpeed:1.5, label:'더 빠르게'},
+      {drops:30, target:115, laserCount:2, laserSpeed:1.3, label:'레이저 2줄'},
+      {drops:30, target:150, laserCount:2, laserSpeed:1.7, label:'더 빠르고 촘촘하게'},
+      {drops:32, target:195, laserCount:3, laserSpeed:1.7, label:'⚡ 레이저 그물 3줄'},
     ] },
 ];
+WORLDS.push({ id:'secret', name:'비밀의 방', icon:'🌌', color:'#845ef7', desc:'모든 걸 다 갈아엎은 리믹스 스테이지',
+  stages:[
+    {drops:26, target:110, bombTypes:['nuke'], bombChance:0.14, label:'☢️ 핵폭탄'},
+    {drops:28, target:150, meteorPeriod:3.4, meteorDestroy:true, label:'☄️ 파괴 운석'},
+    {drops:26, animal:true, animalScale:1.6, goal:'tier', tierTarget:5, label:'🦣 초대형 동물'},
+    {drops:22, fruitScale:0.55, tripleDrop:true, target:230, label:'🔬 미니 과일 3연발'},
+    {drops:30, zeroGravity:true, target:170, label:'🌌 무중력 파티'},
+  ] });
 
 const UNLOCK_THRESHOLDS = [0, 3, 6, 9, 12, 15];
+const SECRET_RATIO = 0.75;
+function maxPossibleStars(){ return (WORLDS.length-1)*15; }
+function secretThreshold(){ return Math.ceil(maxPossibleStars()*SECRET_RATIO); }
+function totalStarsAll(){
+  return WORLDS.filter(w=>w.id!=='secret').reduce((sum,w)=>sum+worldTotalStars(w.id),0);
+}
 function isWorldUnlocked(wi){
+  const w = WORLDS[wi];
+  if(w.id==='secret') return totalStarsAll() >= secretThreshold();
   if(wi===0) return true;
   const need = UNLOCK_THRESHOLDS[wi] || 15;
   return worldTotalStars(WORLDS[wi-1].id) >= need;
@@ -342,16 +359,26 @@ function renderHub(){
   list.innerHTML = '';
   WORLDS.forEach((w, wi)=>{
     const unlocked = isWorldUnlocked(wi);
+    const isSecret = w.id==='secret';
     const total = worldTotalStars(w.id);
-    const prevTotal = wi>0 ? worldTotalStars(WORLDS[wi-1].id) : 0;
-    const need = UNLOCK_THRESHOLDS[wi] || 15;
     const card = document.createElement('div');
-    card.className = 'worldCard' + (unlocked?'':' locked');
-    card.innerHTML =
-      '<div class="planetIcon" style="background:'+w.color+';">'+w.icon+'</div>'+
-      '<div class="worldInfo"><h3>'+w.name+'</h3><p>'+w.desc+'</p>'+
-      '<div class="worldStars">⭐ '+total+' / 15</div></div>'+
-      (unlocked?'':'<div class="lockIcon">🔒 ⭐'+prevTotal+'/'+need+'</div>');
+    card.className = 'worldCard' + (unlocked?'':' locked') + (isSecret?' secretCard':'');
+    if(isSecret && !unlocked){
+      const cur = totalStarsAll(), need = secretThreshold();
+      card.innerHTML =
+        '<div class="planetIcon" style="background:#2b2450;">❓</div>'+
+        '<div class="worldInfo"><h3>???</h3><p>총 별 '+need+'개를 모으면 열려요</p>'+
+        '<div class="worldStars">⭐ '+cur+' / '+need+'</div></div>'+
+        '<div class="lockIcon">🔒</div>';
+    } else {
+      const prevTotal = (wi>0 && !isSecret) ? worldTotalStars(WORLDS[wi-1].id) : 0;
+      const need = UNLOCK_THRESHOLDS[wi] || 15;
+      card.innerHTML =
+        '<div class="planetIcon" style="background:'+w.color+';">'+w.icon+'</div>'+
+        '<div class="worldInfo"><h3>'+w.name+'</h3><p>'+w.desc+'</p>'+
+        '<div class="worldStars">⭐ '+total+' / 15</div></div>'+
+        (unlocked?'':'<div class="lockIcon">🔒 ⭐'+prevTotal+'/'+need+'</div>');
+    }
     if(unlocked){
       card.addEventListener('click', function(){ sfxClick(); ensureAudio(); goStages(wi); });
     }
@@ -544,20 +571,15 @@ function mountMerge(area, cfg, cb){
     { r:90, color:'#adb5bd', hi:'#ced4da', score:150, emoji:'🐘', weight:2.0, name:'코끼리' },
     { r:114,color:'#8d6e5c', hi:'#a98b74', score:300, emoji:'🦣', weight:2.4, name:'매머드' },
   ];
-  const SKIN = cfg.animal ? ANIMALS : FRUITS;
+  const scaleMul = cfg.animal ? (cfg.animalScale||1) : (cfg.fruitScale||1);
+  const baseSkin = cfg.animal ? ANIMALS : FRUITS;
+  const SKIN = scaleMul!==1 ? baseSkin.map(f=>Object.assign({}, f, {r:f.r*scaleMul})) : baseSkin;
   const BOMB_R = 30;
-  const BOMB_COLORS = { score:'#ff922b', dud:'#868e96', shock:'#ff6b6b' };
-  const DIRS = ['down','right','left','up'];
-  let GDIR = cfg.gravityDir || 'down';
+  const BOMB_COLORS = { score:'#ff922b', dud:'#868e96', shock:'#ff6b6b', nuke:'#ff0000' };
   const canvas = document.createElement('canvas');
   area.appendChild(canvas);
   const ctx = canvas.getContext('2d');
   let W=0,H=0,DPR=1,simW=0,simH=0;
-  function computeSimDims(){
-    simW = (GDIR==='right'||GDIR==='left') ? H : W;
-    simH = (GDIR==='right'||GDIR==='left') ? W : H;
-    DANGER_Y = simH*0.06;
-  }
   function resize(){
     const rect = area.getBoundingClientRect();
     DPR = Math.min(window.devicePixelRatio||1,2);
@@ -565,40 +587,20 @@ function mountMerge(area, cfg, cb){
     canvas.style.width=W+'px'; canvas.style.height=H+'px';
     canvas.width=Math.floor(W*DPR); canvas.height=Math.floor(H*DPR);
     ctx.setTransform(DPR,0,0,DPR,0,0);
-    computeSimDims();
+    simW=W; simH=H;
+    DANGER_Y = simH*0.06;
   }
-  function posSimToPhys(dir,sx,sy){
-    switch(dir){
-      case 'right': return [sy, sx];
-      case 'left': return [W-sy, sx];
-      case 'up': return [sx, H-sy];
-      default: return [sx, sy];
-    }
-  }
-  function posPhysToSim(dir,px,py){
-    switch(dir){
-      case 'right': return [py, px];
-      case 'left': return [py, W-px];
-      case 'up': return [px, H-py];
-      default: return [px, py];
-    }
-  }
-  function vecSimToPhys(dir,vx,vy){
-    switch(dir){ case 'right': return [vy,vx]; case 'left': return [-vy,vx]; case 'up': return [vx,-vy]; default: return [vx,vy]; }
-  }
-  function vecPhysToSim(dir,vx,vy){
-    switch(dir){ case 'right': return [vy,vx]; case 'left': return [vy,-vx]; case 'up': return [vx,-vy]; default: return [vx,vy]; }
-  }
-  function simToPhys(sx,sy){ return posSimToPhys(GDIR,sx,sy); }
-  function physToSim(px,py){ return posPhysToSim(GDIR,px,py); }
   let DANGER_Y=0;
+  const noSettle = !!(cfg.zeroGravity);
   const GRAVITY=1400, DAMPING=0.985, WALL_R=0.28, FLOOR_R=0.22, FRUIT_R=0.12;
+  const gravityMul = cfg.zeroGravity ? 0.06 : 1;
   let bodies=[], idc=1, score=0, dropsLeft=cfg.drops, dangerTimer=0, ended=false, maxTierEver=0;
   let dropX=0, currentIndex=0, nextIndex=0, currentBombType=null, nextBombType=null, canDrop=true, aiming=false;
   let particles=[], floatTexts=[], shake=0;
-  let obstacleAngle=0, spinAngle=0, totalT=0, exhaustTimer=0;
-  let gravitySwitchTimer = cfg.gravitySwitch ? (cfg.gravitySwitchPeriod||5) : Infinity;
+  let obstacleAngle=0, totalT=0, exhaustTimer=0;
   let meteors=[], meteorTimer = cfg.meteorPeriod ? cfg.meteorPeriod*0.6 : Infinity;
+  let crusherPhase = cfg.crusherCount ? Array.from({length:cfg.crusherCount},(_,i)=>i*(Math.PI/cfg.crusherCount)) : [];
+  let laserPhase = cfg.laserCount ? Array.from({length:cfg.laserCount},(_,i)=>i*(Math.PI/Math.max(1,cfg.laserCount))) : [];
 
   function shapeFor(f){
     if(!f.emoji) return {rx:f.r, ry:f.r};
@@ -607,10 +609,10 @@ function mountMerge(area, cfg, cb){
     return { rx: f.r*(shape.wRatio/maxRatio), ry: f.r*(shape.hRatio/maxRatio) };
   }
   function makeBody(x,y,index,bombType){
-    if(index===-1) return {id:idc++,x,y,vx:0,vy:0,index:-1,isBomb:true,bombType:bombType||'score',fusing:false,fuseTimer:0,r:BOMB_R,rx:BOMB_R,ry:BOMB_R,merging:false,spawnT:0,drawScale:0.6,weight:1};
+    if(index===-1) return {id:idc++,x,y,vx:0,vy:0,index:-1,isBomb:true,bombType:bombType||'score',fusing:false,fuseTimer:0,r:BOMB_R,rx:BOMB_R,ry:BOMB_R,merging:false,spawnT:0,drawScale:0.6,weight:1,rot:0,angVel:0};
     const f=SKIN[index];
     const {rx,ry} = shapeFor(f);
-    return {id:idc++,x,y,vx:0,vy:0,index,rx,ry,r:Math.max(rx,ry),merging:false,spawnT:0,drawScale:0.6,weight:(f.weight||1)};
+    return {id:idc++,x,y,vx:0,vy:0,index,rx,ry,r:Math.max(rx,ry),merging:false,spawnT:0,drawScale:0.6,weight:(f.weight||1),rot:0,angVel:0};
   }
   function effRadius(b, angle){
     if(Math.abs(b.rx-b.ry)<0.5) return b.rx;
@@ -620,28 +622,38 @@ function mountMerge(area, cfg, cb){
   function pickBombType(){ const t=cfg.bombTypes||['score']; return t[Math.floor(Math.random()*t.length)]; }
   function randomDropIndex(){
     if(cfg.bombTypes && Math.random()<(cfg.bombChance||0.15)) return -1;
-    const r=Math.random();
-    if(r<0.45) return 0; if(r<0.75) return 1; if(r<0.92) return 2; return 3;
+    const p = Math.min(maxTierEver, 6);
+    const w0 = Math.max(0.12, 0.55 - p*0.07);
+    const w1 = 0.3;
+    const w2 = Math.min(0.35, 0.1 + p*0.04);
+    const w3 = Math.min(0.2, p*0.03);
+    const total = w0+w1+w2+w3;
+    const r = Math.random()*total;
+    if(r<w0) return 0;
+    if(r<w0+w1) return 1;
+    if(r<w0+w1+w2) return 2;
+    return 3;
   }
-  function drawFruit(x,y,rx,ry,index,alpha,bombType,fusing){
+  function drawFruit(x,y,rx,ry,index,alpha,bombType,fusing,rot){
     ctx.save(); ctx.globalAlpha = alpha===undefined?1:alpha;
     if(index===-1){
       let ringColor = BOMB_COLORS[bombType||'score'];
-      if(fusing){ ringColor = (Math.floor(totalT*10)%2===0) ? '#ffffff' : '#ff0000'; }
+      if(fusing || bombType==='nuke'){ ringColor = (Math.floor(totalT*10)%2===0) ? '#ffffff' : '#ff0000'; }
       const grad=ctx.createRadialGradient(x-rx*0.3,y-ry*0.3,rx*0.1,x,y,rx);
       grad.addColorStop(0,'#495057'); grad.addColorStop(1,'#1a1a1a');
       ctx.beginPath(); ctx.arc(x,y,rx,0,Math.PI*2); ctx.fillStyle=grad; ctx.fill();
       ctx.lineWidth=Math.max(2,rx*0.09); ctx.strokeStyle=ringColor; ctx.stroke();
       ctx.font=(rx*1.2)+'px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.fillText('💣', x, y+1);
+      ctx.fillText(bombType==='nuke'?'☢️':'💣', x, y+1);
       ctx.restore();
       return;
     }
     const f=SKIN[index];
     if(f.emoji){
+      ctx.translate(x,y); ctx.rotate(rot||0);
       ctx.font=(Math.max(rx,ry)*1.7)+'px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
       ctx.shadowColor='rgba(0,0,0,0.4)'; ctx.shadowBlur=Math.max(rx,ry)*0.15;
-      ctx.fillText(f.emoji, x, y+1);
+      ctx.fillText(f.emoji, 0, 1);
     } else {
       const grad = ctx.createRadialGradient(x-rx*0.35,y-ry*0.35,Math.min(rx,ry)*0.1,x,y,Math.max(rx,ry));
       grad.addColorStop(0,f.hi); grad.addColorStop(1,f.color);
@@ -664,13 +676,17 @@ function mountMerge(area, cfg, cb){
       ? (SKIN[cfg.tierTarget].name+' 만들기 · 드롭 '+cfg.drops+'회 이내')
       : ('목표 점수 '+cfg.target+'점 · 드롭 '+cfg.drops+'회 이내');
     const extras=[];
-    if(cfg.bombTypes) extras.push('💣 폭탄 종류를 잘 살펴보세요');
+    if(cfg.bombTypes && cfg.bombTypes.includes('nuke')) extras.push('☢️ 핵폭탄은 화면 전체를 쓸어버려요');
+    else if(cfg.bombTypes) extras.push('💣 폭탄 종류를 잘 살펴보세요');
     if(cfg.obstacleCount) extras.push('🌀 회전 통나무를 피하세요');
+    if(cfg.crusherCount) extras.push('🔨 압착기가 내려와요');
+    if(cfg.laserCount) extras.push('⚡ 레이저를 피하세요');
     if(cfg.animal) extras.push('무거운 동물일수록 빨리 떨어져요');
-    if(cfg.gravityDir==='spin') extras.push('🌪️ 중력이 계속 회전해요');
-    else if(cfg.gravitySwitch) extras.push('🧭 중력 방향이 계속 바뀌어요');
-    else if(cfg.gravityDir) extras.push('🧭 중력 방향을 확인하세요');
-    if(cfg.meteorPeriod) extras.push('☄️ 하늘에서 운석이 떨어져요');
+    if(cfg.animalScale && cfg.animalScale>1) extras.push('🦣 동물이 훨씬 커요');
+    if(cfg.fruitScale && cfg.fruitScale<1) extras.push('🔬 과일이 훨씬 작아요');
+    if(cfg.tripleDrop) extras.push('🍇 한 번에 3개씩 떨어져요');
+    if(cfg.meteorPeriod) extras.push(cfg.meteorDestroy ? '☄️ 운석이 과일을 파괴해요' : '☄️ 하늘에서 운석이 떨어져요');
+    if(cfg.zeroGravity) extras.push('🌌 무중력! 과일이 둥둥 떠다녀요');
     if(extras.length) goalMsg += ' — ' + extras.join(' · ');
     cb.setGoal(goalMsg);
   })();
@@ -682,6 +698,7 @@ function mountMerge(area, cfg, cb){
     }
   }
   function addFloat(x,y,text,color){ floatTexts.push({x,y,text,age:0,life:0.9,color:color||'#ffe066'}); }
+  function kick(b, force){ b.angVel += force; }
 
   function curShape(){ return currentIndex===-1 ? {rx:BOMB_R,ry:BOMB_R} : shapeFor(SKIN[currentIndex]); }
   function onDown(e){ if(ended) return; ensureAudio(); aiming=true; updateAim(e); e.preventDefault(); }
@@ -689,19 +706,27 @@ function mountMerge(area, cfg, cb){
   function onUp(e){ if(!aiming) return; aiming=false; doDrop(); e.preventDefault(); }
   function updateAim(e){
     const {rx} = curShape();
-    let clientX,clientY;
-    if(e.touches && e.touches.length){ clientX=e.touches[0].clientX; clientY=e.touches[0].clientY; }
-    else if(e.changedTouches && e.changedTouches.length){ clientX=e.changedTouches[0].clientX; clientY=e.changedTouches[0].clientY; }
-    else { clientX=e.clientX; clientY=e.clientY; }
+    let clientX;
+    if(e.touches && e.touches.length) clientX=e.touches[0].clientX;
+    else if(e.changedTouches && e.changedTouches.length) clientX=e.changedTouches[0].clientX;
+    else clientX=e.clientX;
     const rect=canvas.getBoundingClientRect();
-    const [sx] = physToSim(clientX-rect.left, clientY-rect.top);
-    dropX = Math.max(rx+4, Math.min(simW-rx-4, sx));
+    dropX = Math.max(rx+4, Math.min(simW-rx-4, clientX-rect.left));
   }
   function doDrop(){
     if(!canDrop || ended || dropsLeft<=0) return;
     canDrop=false;
-    const {ry} = curShape();
-    bodies.push(makeBody(dropX,ry+4,currentIndex,currentBombType));
+    const {rx,ry} = curShape();
+    if(cfg.tripleDrop && currentIndex!==-1){
+      const spread = rx*2.4;
+      [-spread,0,spread].forEach((off,i)=>{
+        const nb = makeBody(Math.max(rx+2,Math.min(simW-rx-2,dropX+off)), ry+4, currentIndex, currentBombType);
+        nb.vy = -i*20;
+        bodies.push(nb);
+      });
+    } else {
+      bodies.push(makeBody(dropX,ry+4,currentIndex,currentBombType));
+    }
     beep(220,0.1,'triangle',0.1);
     dropsLeft--;
     currentIndex=nextIndex; currentBombType=nextBombType;
@@ -744,6 +769,50 @@ function mountMerge(area, cfg, cb){
         const tx=-Math.sin(bl.ang), ty=Math.cos(bl.ang);
         const dir = ((tx*(b.x-bl.cx)+ty*(b.y-bl.cy))>=0) ? 1 : -1;
         b.vx += tx*tSpeed*0.6*dir; b.vy += ty*tSpeed*0.6*dir;
+        kick(b, dir*2.5);
+      }
+    }
+  }
+  function crusherYAt(i, t){
+    const cols = cfg.crusherCount;
+    const amp = simH*(cfg.crusherAmplitude||0.4);
+    const topY = simH*0.14;
+    const speed = cfg.crusherSpeed||1.3;
+    return { y: topY + amp*(0.5+0.5*Math.sin(t*speed+crusherPhase[i])), vy: amp*speed*0.5*Math.cos(t*speed+crusherPhase[i]) };
+  }
+  function resolveCrushers(b){
+    if(!cfg.crusherCount) return;
+    const cols = cfg.crusherCount;
+    const colW = simW/cols;
+    const col = Math.max(0, Math.min(cols-1, Math.floor(b.x/colW)));
+    if(Math.floor(b.x/colW)!==col) {}
+    for(let i=0;i<cols;i++){
+      const x0=i*colW, x1=(i+1)*colW;
+      if(b.x+b.rx<x0 || b.x-b.rx>x1) continue;
+      const {y:py, vy:pvy} = crusherYAt(i, totalT);
+      const half=10;
+      if(b.y+b.ry>py-half && b.y-b.ry<py+half){
+        if(b.y<py){ b.y = py-half-b.ry; if(pvy>0){ b.vy = pvy*1.3; kick(b, -3); } }
+        else { b.y = py+half+b.ry; b.vy = Math.max(b.vy, 40); kick(b, 3); }
+      }
+    }
+  }
+  function laserXAt(i, t){
+    const speed = cfg.laserSpeed||1.2;
+    return simW*(0.5+0.42*Math.sin(t*speed+laserPhase[i]));
+  }
+  function resolveLasers(b, dt){
+    if(!cfg.laserCount) return;
+    b._laserCd = Math.max(0, (b._laserCd||0)-dt);
+    for(let i=0;i<cfg.laserCount;i++){
+      const lx = laserXAt(i, totalT);
+      if(Math.abs(b.x-lx) < b.rx+6 && b._laserCd<=0){
+        const dir = b.x<lx ? -1 : 1;
+        b.vx += dir*420; b.vy -= 220;
+        kick(b, dir*4);
+        b._laserCd = 0.4;
+        spawnParticles(b.x,b.y,'#63e6be',10,1.1);
+        beep(880,0.08,'square',0.1);
       }
     }
   }
@@ -755,13 +824,27 @@ function mountMerge(area, cfg, cb){
   function meteorImpact(m){
     if(m.dead) return;
     m.dead=true;
+    let bonus=0;
     for(const other of bodies){
       if(other.merging) continue;
       const dx=other.x-m.x, dy=other.y-m.y, dist=Math.max(20,Math.hypot(dx,dy));
+      if(cfg.meteorDestroy && dist<95){
+        other.merging=true;
+        if(!other.isBomb) bonus += (SKIN[other.index]?SKIN[other.index].score:0)*0.6;
+        spawnParticles(other.x,other.y,'#ff922b',8,1.2);
+        continue;
+      }
       if(dist<150){
         const force=(150-dist)*7;
         other.vx += (dx/dist)*force; other.vy += (dy/dist)*force - 60;
+        kick(other, (dx>0?1:-1)*3);
       }
+    }
+    if(cfg.meteorDestroy && bonus>0){
+      score += Math.round(bonus);
+      addFloat(m.x, m.y-20, '+'+Math.round(bonus), '#ff922b');
+      updateHud();
+      if(cfg.goal!=='tier' && score>=cfg.target && !ended) endWin();
     }
     spawnParticles(m.x,m.y,'#ff922b',26,1.8);
     shake=Math.max(shake,15);
@@ -786,28 +869,25 @@ function mountMerge(area, cfg, cb){
     }
     meteors=meteors.filter(m=>!m.dead);
   }
-  function switchGravity(newDir){
-    if(newDir===GDIR) return;
-    const oldDir=GDIR;
-    const converted = bodies.map(b=>{
-      const [px,py]=posSimToPhys(oldDir,b.x,b.y);
-      const [pvx,pvy]=vecSimToPhys(oldDir,b.vx,b.vy);
-      return {b,px,py,pvx,pvy};
-    });
-    GDIR=newDir;
-    computeSimDims();
-    for(const {b,px,py,pvx,pvy} of converted){
-      const [sx,sy]=posPhysToSim(newDir,px,py);
-      const [svx,svy]=vecPhysToSim(newDir,pvx,pvy);
-      b.x=sx; b.y=sy; b.vx=svx; b.vy=svy;
-    }
-    dropX = simW/2;
-    dangerTimer = 0;
-    showGravityBanner(newDir);
-  }
   function detonate(bomb, silent){
     bomb.merging=true;
     let bonus=0;
+    if(bomb.bombType==='nuke'){
+      for(const other of bodies){
+        if(other===bomb || other.merging) continue;
+        other.merging=true;
+        if(!other.isBomb) bonus += (SKIN[other.index]?SKIN[other.index].score:0)*1.2;
+        spawnParticles(other.x,other.y, other.isBomb?'#ff6b6b':SKIN[other.index].color, 8, 1.4);
+      }
+      score += Math.round(bonus)+20;
+      addFloat(bomb.x, bomb.y-BOMB_R-10, '☢️ NUKE! +'+(Math.round(bonus)+20), '#ff0000');
+      beep(50,0.5,'sawtooth',0.28); beep(35,0.6,'sawtooth',0.22,0.1);
+      shake = Math.max(shake, 26);
+      updateHud();
+      if(cfg.goal!=='tier' && score>=cfg.target && !ended) endWin();
+      spawnParticles(bomb.x,bomb.y,'#ff0000',36,2.2);
+      return;
+    }
     if(!silent){
       for(const other of bodies){
         if(other===bomb || other.merging) continue;
@@ -826,6 +906,7 @@ function mountMerge(area, cfg, cb){
         if(dist<160){
           const force=(160-dist)*9;
           other.vx += (dx/dist)*force; other.vy += (dy/dist)*force;
+          kick(other, (dx>0?1:-1)*3);
         }
       }
       addFloat(bomb.x, bomb.y-BOMB_R-10, '💨 충격파!', '#ff6b6b');
@@ -855,6 +936,7 @@ function mountMerge(area, cfg, cb){
         if(dist<minDist){
           const overlap=(minDist-dist)/2, nx=dx/dist, ny=dy/dist, total=ea+eb, aR=eb/total, bR=ea/total;
           a.x-=nx*overlap*aR*2; a.y-=ny*overlap*aR*2; b.x+=nx*overlap*bR*2; b.y+=ny*overlap*bR*2;
+          if(overlap>1.5){ kick(a,-overlap*0.06); kick(b,overlap*0.06); }
         }
       }
     }
@@ -864,38 +946,23 @@ function mountMerge(area, cfg, cb){
     dt=Math.min(dt,1/30);
     totalT += dt;
     if(cfg.obstacleCount) obstacleAngle += dt*(cfg.obstacleSpeed||0.7);
-    if(GDIR==='spin') spinAngle += dt*0.6;
-    if(cfg.gravitySwitch){
-      gravitySwitchTimer -= dt;
-      if(gravitySwitchTimer<=0){
-        let next; do{ next=DIRS[Math.floor(Math.random()*DIRS.length)]; }while(next===GDIR);
-        switchGravity(next);
-        gravitySwitchTimer = cfg.gravitySwitchPeriod||5;
-      }
-    }
     updateMeteors(dt);
     for(const b of bodies){
       if(b.merging) continue;
       b.spawnT+=dt; b.drawScale=0.6+0.4*Math.min(1,b.spawnT/0.15);
+      b.angVel += (-b.rot*9 - b.angVel*3.5)*dt; b.rot += b.angVel*dt;
       if(b.isBomb && b.bombType==='shock' && b.fusing){
         b.fuseTimer -= dt;
         if(b.fuseTimer<=0){ detonate(b, true); continue; }
       }
-      if(GDIR==='spin'){
-        b.vx += Math.sin(spinAngle)*GRAVITY*(b.weight||1)*dt;
-        b.vy += Math.cos(spinAngle)*GRAVITY*(b.weight||1)*dt;
-        b.x+=b.vx*dt; b.y+=b.vy*dt; b.vx*=DAMPING; b.vy*=DAMPING;
-        if(b.x-b.rx<0){ b.x=b.rx; b.vx=-b.vx*WALL_R; }
-        if(b.x+b.rx>simW){ b.x=simW-b.rx; b.vx=-b.vx*WALL_R; }
-        if(b.y-b.ry<0){ b.y=b.ry; b.vy=-b.vy*WALL_R; }
-        if(b.y+b.ry>simH){ b.y=simH-b.ry; b.vy=-b.vy*WALL_R; }
-      } else {
-        b.vy+=GRAVITY*(b.weight||1)*dt; b.x+=b.vx*dt; b.y+=b.vy*dt; b.vx*=DAMPING; b.vy*=DAMPING;
-        if(b.x-b.rx<0){ b.x=b.rx; b.vx=-b.vx*WALL_R; }
-        if(b.x+b.rx>simW){ b.x=simW-b.rx; b.vx=-b.vx*WALL_R; }
-        if(b.y+b.ry>simH){ b.y=simH-b.ry; b.vy=-b.vy*FLOOR_R; if(Math.abs(b.vy)<20) b.vy=0; }
-      }
+      b.vy+=GRAVITY*gravityMul*(b.weight||1)*dt; b.x+=b.vx*dt; b.y+=b.vy*dt; b.vx*=DAMPING; b.vy*=DAMPING;
+      if(b.x-b.rx<0){ b.x=b.rx; b.vx=-b.vx*WALL_R; kick(b,1); }
+      if(b.x+b.rx>simW){ b.x=simW-b.rx; b.vx=-b.vx*WALL_R; kick(b,-1); }
+      if(b.y+b.ry>simH){ b.y=simH-b.ry; b.vy=-b.vy*FLOOR_R; if(Math.abs(b.vy)<20) b.vy=0; }
+      if(cfg.zeroGravity && b.y-b.ry<0){ b.y=b.ry; b.vy=-b.vy*WALL_R; }
       if(cfg.obstacleCount) resolveObstacle(b);
+      if(cfg.crusherCount) resolveCrushers(b);
+      if(cfg.laserCount) resolveLasers(b, dt);
     }
     for(let i=0;i<bodies.length;i++){
       const a=bodies[i]; if(a.merging) continue;
@@ -939,6 +1006,7 @@ function mountMerge(area, cfg, cb){
             if(relDot<0){
               const imp=-relDot*(1+FRUIT_R);
               a.vx-=imp*nx*bR; a.vy-=imp*ny*bR; b.vx+=imp*nx*aR; b.vy+=imp*ny*aR;
+              kick(a,-imp*0.008); kick(b,imp*0.008);
             }
           }
         }
@@ -952,7 +1020,7 @@ function mountMerge(area, cfg, cb){
     floatTexts=floatTexts.filter(t=>t.age<t.life);
     if(shake>0) shake=Math.max(0,shake-dt*30);
 
-    if(GDIR!=='spin'){
+    if(!noSettle){
       let inDanger=false;
       for(const b of bodies){ if(b.y-b.ry<DANGER_Y && Math.abs(b.vy)<90 && b.spawnT>0.6){ inDanger=true; break; } }
       if(inDanger){ dangerTimer+=dt; if(dangerTimer>3.2 && !ended) endLose('과일이 너무 높이 쌓였어요!'); }
@@ -961,7 +1029,7 @@ function mountMerge(area, cfg, cb){
 
     const goalMet = cfg.goal==='tier' ? maxTierEver>=cfg.tierTarget : score>=cfg.target;
     if(!ended && dropsLeft<=0 && !goalMet){
-      if(GDIR==='spin' || cfg.gravitySwitch || cfg.meteorPeriod){
+      if(noSettle || cfg.meteorPeriod || cfg.crusherCount || cfg.laserCount){
         exhaustTimer += dt;
         if(exhaustTimer>1.4) endLose('드롭 횟수를 모두 사용했어요.');
       } else if(bodies.every(b=>Math.abs(b.vy)<5)){
@@ -979,47 +1047,63 @@ function mountMerge(area, cfg, cb){
   }
   function endLose(msg){ ended=true; setTimeout(()=>cb.onLose(msg), 300); }
 
-  function renderLine(sx1,sy1,sx2,sy2){
-    const [px1,py1]=simToPhys(sx1,sy1), [px2,py2]=simToPhys(sx2,sy2);
-    ctx.moveTo(px1,py1); ctx.lineTo(px2,py2);
-  }
   function render(){
     ctx.clearRect(0,0,W,H);
     ctx.save();
     if(shake>0){ ctx.translate((Math.random()-0.5)*shake, (Math.random()-0.5)*shake); }
-    if(GDIR!=='spin'){
+    if(!noSettle){
       ctx.save(); ctx.strokeStyle='rgba(255,80,80,0.5)'; ctx.setLineDash([6,6]); ctx.lineWidth=2;
-      ctx.beginPath(); renderLine(0,DANGER_Y,simW,DANGER_Y); ctx.stroke(); ctx.restore();
+      ctx.beginPath(); ctx.moveTo(0,DANGER_Y); ctx.lineTo(simW,DANGER_Y); ctx.stroke(); ctx.restore();
     }
     if(cfg.obstacleCount){
       for(const bl of obstacleBlades()){
-        const [px1,py1]=simToPhys(bl.x1,bl.y1), [px2,py2]=simToPhys(bl.x2,bl.y2), [pcx,pcy]=simToPhys(bl.cx,bl.cy);
         ctx.save();
         ctx.lineCap='round'; ctx.lineWidth=14; ctx.strokeStyle='rgba(120,80,40,0.9)';
-        ctx.beginPath(); ctx.moveTo(px1,py1); ctx.lineTo(px2,py2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(bl.x1,bl.y1); ctx.lineTo(bl.x2,bl.y2); ctx.stroke();
         ctx.lineWidth=6; ctx.strokeStyle='rgba(200,150,90,0.9)';
-        ctx.beginPath(); ctx.moveTo(px1,py1); ctx.lineTo(px2,py2); ctx.stroke();
-        ctx.beginPath(); ctx.arc(pcx,pcy,9,0,Math.PI*2); ctx.fillStyle='#495057'; ctx.fill();
+        ctx.beginPath(); ctx.moveTo(bl.x1,bl.y1); ctx.lineTo(bl.x2,bl.y2); ctx.stroke();
+        ctx.beginPath(); ctx.arc(bl.cx,bl.cy,9,0,Math.PI*2); ctx.fillStyle='#495057'; ctx.fill();
+        ctx.restore();
+      }
+    }
+    if(cfg.crusherCount){
+      const colW = simW/cfg.crusherCount;
+      for(let i=0;i<cfg.crusherCount;i++){
+        const {y:py} = crusherYAt(i, totalT);
+        const x0=i*colW+4, x1=(i+1)*colW-4;
+        ctx.save();
+        ctx.fillStyle='rgba(160,120,70,0.95)';
+        ctx.fillRect(x0, py-10, x1-x0, 20);
+        ctx.fillStyle='rgba(230,180,110,0.9)';
+        ctx.fillRect(x0, py-10, x1-x0, 5);
+        ctx.restore();
+      }
+    }
+    if(cfg.laserCount){
+      for(let i=0;i<cfg.laserCount;i++){
+        const lx = laserXAt(i, totalT);
+        ctx.save();
+        const grad = ctx.createLinearGradient(lx-6,0,lx+6,0);
+        grad.addColorStop(0,'rgba(99,230,190,0)'); grad.addColorStop(0.5,'rgba(99,230,190,0.9)'); grad.addColorStop(1,'rgba(99,230,190,0)');
+        ctx.fillStyle=grad;
+        ctx.fillRect(lx-6,0,12,simH);
         ctx.restore();
       }
     }
     for(const m of meteors){
       for(const t of m.trail){
-        const [tpx,tpy]=simToPhys(t.x,t.y);
         const a=1-t.age/0.25; ctx.save(); ctx.globalAlpha=Math.max(0,a)*0.5; ctx.fillStyle='#ff922b';
-        ctx.beginPath(); ctx.arc(tpx,tpy,m.r*0.55,0,Math.PI*2); ctx.fill(); ctx.restore();
+        ctx.beginPath(); ctx.arc(t.x,t.y,m.r*0.55,0,Math.PI*2); ctx.fill(); ctx.restore();
       }
-      const [mpx,mpy]=simToPhys(m.x,m.y);
       ctx.save();
-      const grad=ctx.createRadialGradient(mpx,mpy,2,mpx,mpy,m.r);
+      const grad=ctx.createRadialGradient(m.x,m.y,2,m.x,m.y,m.r);
       grad.addColorStop(0,'#fff3bf'); grad.addColorStop(0.5,'#ff922b'); grad.addColorStop(1,'#e8590c');
-      ctx.beginPath(); ctx.arc(mpx,mpy,m.r,0,Math.PI*2); ctx.fillStyle=grad; ctx.fill();
+      ctx.beginPath(); ctx.arc(m.x,m.y,m.r,0,Math.PI*2); ctx.fillStyle=grad; ctx.fill();
       ctx.restore();
     }
     for(const b of bodies){
-      const [px,py]=simToPhys(b.x,b.y);
       const scale=(b.drawScale||1);
-      drawFruit(px,py,b.rx*scale,b.ry*scale,b.index,undefined,b.bombType,b.fusing);
+      drawFruit(b.x,b.y,b.rx*scale,b.ry*scale,b.index,undefined,b.bombType,b.fusing,b.rot);
     }
     for(const p of particles){
       const a=1-p.age/p.life; ctx.save(); ctx.globalAlpha=Math.max(0,a); ctx.fillStyle=p.color;
@@ -1033,9 +1117,8 @@ function mountMerge(area, cfg, cb){
     if(!ended){
       const {rx,ry}=curShape();
       ctx.save(); ctx.globalAlpha=0.9; ctx.setLineDash([4,6]); ctx.strokeStyle='rgba(255,255,255,0.25)';
-      ctx.beginPath(); renderLine(dropX,ry*2+8,dropX,simH); ctx.stroke(); ctx.restore();
-      const [dpx,dpy]=simToPhys(dropX,ry+4);
-      drawFruit(dpx,dpy,rx,ry,currentIndex,canDrop?1:0.5,currentBombType,false);
+      ctx.beginPath(); ctx.moveTo(dropX,ry*2+8); ctx.lineTo(dropX,simH); ctx.stroke(); ctx.restore();
+      drawFruit(dropX,ry+4,rx,ry,currentIndex,canDrop?1:0.5,currentBombType,false,0);
     }
     ctx.restore();
   }
@@ -1054,30 +1137,11 @@ function mountMerge(area, cfg, cb){
   const onResize=()=>resize();
   window.addEventListener('resize', onResize);
 
-  let banner=null, bannerTimers=[];
-  function showGravityBanner(dir){
-    const labels={down:'⬇️ 중력이 아래로!',right:'➡️ 중력이 오른쪽으로!',left:'⬅️ 중력이 왼쪽으로!',up:'⬆️ 중력이 위로!',spin:'🌪️ 중력이 빙글빙글 돌아요!'};
-    bannerTimers.forEach(t=>clearTimeout(t));
-    bannerTimers=[];
-    if(!banner){
-      banner=document.createElement('div');
-      banner.style.cssText='position:absolute; top:16px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.75); color:#fff; padding:10px 18px; border-radius:20px; font-weight:800; font-size:15px; z-index:10; pointer-events:none; transition:opacity 0.6s;';
-      area.style.position='relative';
-      area.appendChild(banner);
-    }
-    banner.textContent = labels[dir]||'';
-    banner.style.opacity='1';
-    bannerTimers.push(setTimeout(()=>{ if(banner) banner.style.opacity='0'; }, 1600));
-  }
-  if(cfg.gravityDir) showGravityBanner(cfg.gravityDir);
-
   return {
     destroy(){
       cancelAnimationFrame(raf);
       window.removeEventListener('resize', onResize);
       window.removeEventListener('mouseup', onUp);
-      bannerTimers.forEach(t=>clearTimeout(t));
-      if(banner && banner.parentNode) banner.parentNode.removeChild(banner);
     }
   };
 }
