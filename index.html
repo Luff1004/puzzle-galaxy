@@ -126,7 +126,7 @@
   <div id="screens">
     <section id="screen-hub" class="screen active">
       <div class="hubTitle">
-        <h1>🍉 과일 갤럭시</h1>
+        <h1 id="hubLogo">🍉 과일 갤럭시</h1>
         <p>맵을 골라 과일을 합쳐보세요</p>
       </div>
       <div id="worldList"></div>
@@ -389,6 +389,43 @@ function renderStages(wi){
     map.appendChild(nodeWrap);
   }
 }
+
+/* ---------- Dev cheat code: unlock everything ---------- */
+function showCheatToast(){
+  const t = document.createElement('div');
+  t.textContent = '🔓 개발자 모드: 모든 맵 해금!';
+  t.style.cssText = 'position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:rgba(10,8,20,0.92); color:#ffe066; padding:16px 26px; border-radius:18px; font-weight:800; font-size:16px; z-index:100; pointer-events:none; box-shadow:0 12px 30px rgba(0,0,0,0.5); transition:opacity 0.5s;';
+  document.body.appendChild(t);
+  setTimeout(()=>{ t.style.opacity='0'; }, 1200);
+  setTimeout(()=>{ if(t.parentNode) t.parentNode.removeChild(t); }, 1800);
+}
+function unlockAllMaps(){
+  WORLDS.forEach(w=>{ save[w.id] = [3,3,3,3,3]; });
+  writeSave();
+  sfxWin();
+  showCheatToast();
+  if(screens.hub.classList.contains('active')) renderHub();
+  if(screens.stages.classList.contains('active')) renderStages(currentWorldIdx);
+}
+let cheatKeyBuffer = '';
+window.addEventListener('keydown', function(e){
+  if(e.key.length===1 && /[a-zA-Z]/.test(e.key)){
+    cheatKeyBuffer = (cheatKeyBuffer + e.key.toLowerCase()).slice(-8);
+    if(cheatKeyBuffer==='amethyst'){ unlockAllMaps(); cheatKeyBuffer=''; }
+  }
+});
+(function(){
+  let tapCount=0, lastTap=0;
+  const logo = byId('hubLogo');
+  if(!logo) return;
+  logo.addEventListener('click', function(){
+    const now = Date.now();
+    if(now-lastTap>2000) tapCount=0;
+    lastTap = now;
+    tapCount++;
+    if(tapCount>=60){ unlockAllMaps(); tapCount=0; }
+  });
+})();
 
 /* ---------- Result overlay ---------- */
 function showResult(win, stars, subtitle, opts){
